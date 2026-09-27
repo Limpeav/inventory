@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: inventory-backend
+
+  config:
+    import:
+      - "optional:classpath:application-local.yml"
+      - "optional:file:.env[.properties]"
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/inventory_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Phnom_Penh
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api/v1
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+    access-token-expiration: ${JWT_EXPIRATION:3600000}       # 1 hour in ms
+    refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}    # 7 days in ms
+
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+
+  seed:
+    enabled: ${APP_SEED_ENABLED:true}
+    admin-username: ${APP_ADMIN_USERNAME:admin}
+    admin-email: ${APP_ADMIN_EMAIL:admin@inventory.com}
+    admin-password: ${APP_ADMIN_PASSWORD:}
+    admin-fullname: ${APP_ADMIN_FULLNAME:System Administrator}
+
+logging:
+  level:
+    com.inventory: ${LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
