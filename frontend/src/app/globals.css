@@ -13,11 +13,34 @@
   --warning: #f59e0b;
   --success: #10b981;
 
+  /* Light Theme */
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-subtle: rgba(0, 0, 0, 0.04);
+  --header-bg: rgba(255, 255, 255, 0.8);
+  --border: rgba(99, 102, 241, 0.2);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(99, 102, 241, 0.15);
+}
+
+.dark {
   /* Dark Theme */
   --bg-base: #0f0f1a;
   --bg-surface: #16162a;
   --bg-elevated: #1e1e3a;
   --bg-card: #1a1a2e;
+  --bg-subtle: rgba(255, 255, 255, 0.04);
+  --header-bg: rgba(22, 22, 42, 0.8);
   --border: rgba(99, 102, 241, 0.2);
   --border-subtle: rgba(255, 255, 255, 0.06);
 
@@ -144,7 +167,7 @@ body {
 /* Form inputs */
 .input-field {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 12px 16px;

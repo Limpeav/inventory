@@ -10,6 +10,7 @@ import {
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
 import Cookies from 'js-cookie';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'main' },
@@ -93,7 +94,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px',
             padding: '10px 12px', borderRadius: '10px',
-            background: 'rgba(255,255,255,0.04)',
+            background: 'var(--bg-subtle)',
             marginBottom: '8px',
           }}>
             <div style={{
@@ -144,7 +145,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header style={{
           height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '0 28px', borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(22,22,42,0.8)', backdropFilter: 'blur(10px)',
+          background: 'var(--header-bg)', backdropFilter: 'blur(10px)',
           position: 'sticky', top: 0, zIndex: 30,
         }}>
           {/* Breadcrumb */}
@@ -166,9 +167,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right side */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <ThemeToggle />
             <button style={{
               width: '36px', height: '36px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
-              background: 'rgba(255,255,255,0.04)', cursor: 'pointer', display: 'flex',
+              background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
               transition: 'all 0.15s ease',
             }}>

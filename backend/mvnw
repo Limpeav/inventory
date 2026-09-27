@@ -39,6 +39,14 @@ CYGWIN* | MINGW*)
   [ -z "${JAVA_HOME-}" ] || JAVA_HOME="$(cygpath --unix "$JAVA_HOME")"
   native_path() { cygpath --path --windows "$1"; }
   ;;
+Darwin*)
+  if [ -z "${JAVA_HOME-}" ] || echo "${JAVA_HOME-}" | grep -q "25"; then
+    if /usr/libexec/java_home -v 21 >/dev/null 2>&1; then
+      JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+      export JAVA_HOME
+    fi
+  fi
+  ;;
 esac
 
 # set JAVACMD and JAVACCMD

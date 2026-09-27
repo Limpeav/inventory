@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,10 +19,16 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { setAuth, isAuthenticated } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
   const {
     register,
@@ -38,7 +45,7 @@ export default function LoginPage() {
       const response = await authApi.login(data);
       if (response.success) {
         setAuth(response.data);
-        router.push('/dashboard');
+        router.replace('/dashboard');
       } else {
         setError(response.message || 'Login failed');
       }
@@ -133,7 +140,24 @@ export default function LoginPage() {
 
             {/* Password */}
             <div style={{ marginBottom: '24px' }}>
-              <label className="label" htmlFor="password">Password</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="label" htmlFor="password" style={{ marginBottom: 0 }}>Password</label>
+                <Link
+                  href="/forgot-password"
+                  id="link-forgot-password"
+                  style={{
+                    fontSize: '12px',
+                    color: 'var(--primary-light)',
+                    textDecoration: 'none',
+                    fontWeight: '500',
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--primary-light)')}
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                   <Lock size={16} />
