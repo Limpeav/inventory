@@ -2,20 +2,21 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const publicPaths = ['/login', '/forgot-password', '/reset-password'];
-const protectedPaths = ['/dashboard', '/settings'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('accessToken')?.value;
+  const refreshToken = request.cookies.get('refreshToken')?.value;
+  const hasAuth = !!(token || refreshToken);
 
-  // Redirect authenticated users away from login
-  if (publicPaths.some(p => pathname.startsWith(p)) && token) {
+  // Redirect authenticated users away from login/public auth pages
+  if (publicPaths.some(p => pathname.startsWith(p)) && hasAuth) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // Redirect unauthenticated users to login
-  const isProtected = protectedPaths.some(p => pathname.startsWith(p));
-  if (isProtected && !token) {
+  // Redirect unauthenticated users to login for protected pages
+  const isPublic = publicPaths.some(p => pathname.startsWith(p)) || pathname === '/';
+  if (!isPublic && !hasAuth) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

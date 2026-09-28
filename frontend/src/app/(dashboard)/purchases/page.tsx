@@ -1,0 +1,324 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { purchaseApi, Purchase, CreatePurchaseRequest } from '@/lib/purchase-api';
+import { supplierApi, Supplier } from '@/lib/supplier-api';
+import { productApi, Product } from '@/lib/product-api';
+import {
+  ShoppingCart, Plus, X, AlertCircle, Search, RefreshCw,
+  Trash2, DollarSign, Ban, CheckCircle2, ClipboardList, Truck
+} from 'lucide-react';
+
+// ─── Status Badge ─────────────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { color: string; bg: string; border: string }> = {
+    RECEIVED:  { color: '#10b981', bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.3)' },
+    PENDING:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.3)' },
+    PARTIAL:   { color: '#6366f1', bg: 'rgba(99,102,241,0.1)',   border: 'rgba(99,102,241,0.3)' },
+    CANCELLED: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',    border: 'rgba(239,68,68,0.3)' },
+  };
+  const s = map[status] ?? map.PENDING;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>
+      {status}
+    </span>
+  );
+}
+
+// ─── Create Modal ─────────────────────────────────────────────────────────────
+function CreatePurchaseModal({
+  suppliers,
+  products,
+  onClose,
+  onSaved,
+}: {
+  suppliers: Supplier[];
+  products: Product[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().slice(0, 10));
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [supplierId, setSupplierId] = useState('');
+  const [referenceCode, setReferenceCode] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [discount, setDiscount] = useState('0');
+  const [note, setNote] = useState('');
+  const [lines, setLines] = useState([{ productId: '', quantity: 1, unitCost: 0, discount: 0 }]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const addLine = () => setLines(l => [...l, { productId: '', quantity: 1, unitCost: 0, discount: 0 }]);
+  const removeLine = (i: number) => setLines(l => l.filter((_, idx) => idx !== i));
+  const updateLine = (i: number, key: string, val: unknown) =>
+    setLines(l => l.map((line, idx) => idx === i ? { ...line, [key]: val } : line));
+
+  const onProductChange = (i: number, productId: string) => {
+    const prod = products.find(p => p.id === productId);
+    setLines(l => l.map((line, idx) => idx === i
+      ? { ...line, productId, unitCost: prod?.cost ?? 0 }
+      : line));
+  };
+
+  const subtotal = lines.reduce((acc, l) => acc + (l.unitCost * l.quantity - l.discount), 0);
+  const total = Math.max(0, subtotal - parseFloat(discount || '0'));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (lines.some(l => !l.productId)) { setError('Please select a product for all lines'); return; }
+    setSaving(true); setError('');
+    try {
+      await purchaseApi.create({
+        referenceCode: referenceCode || undefined,
+        purchaseDate,
+        deliveryDate: deliveryDate || undefined,
+        supplierId: supplierId || undefined,
+        currency,
+        discount: parseFloat(discount || '0'),
+        note: note || undefined,
+        items: lines.map(l => ({ productId: l.productId, quantity: l.quantity, unitCost: l.unitCost, discount: l.discount })),
+      });
+      onSaved();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setError(e?.response?.data?.message ?? 'Failed to create purchase');
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" style={{ maxWidth: 760, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>New Purchase Order</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20} /></button>
+        </div>
+        {error && <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, marginBottom: 16, color: '#f87171', fontSize: 13 }}><AlertCircle size={15} />{error}</div>}
+        <form onSubmit={submit}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
+            <div><label className="label">PO Reference #</label><input className="input-field" value={referenceCode} onChange={e => setReferenceCode(e.target.value)} placeholder="Auto-generated if blank" /></div>
+            <div><label className="label">Purchase Date *</label><input className="input-field" type="date" required value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} /></div>
+            <div><label className="label">Expected Delivery</label><input className="input-field" type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
+            <div><label className="label">Supplier</label>
+              <select className="input-field" value={supplierId} onChange={e => setSupplierId(e.target.value)}>
+                <option value="">— Select Supplier —</option>
+                {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div><label className="label">Currency</label>
+              <select className="input-field" value={currency} onChange={e => setCurrency(e.target.value)}>
+                <option value="USD">USD ($)</option>
+                <option value="KHR">KHR (฿)</option>
+              </select>
+            </div>
+            <div><label className="label">Overall Discount</label><input className="input-field" type="number" step="0.01" min="0" value={discount} onChange={e => setDiscount(e.target.value)} /></div>
+            <div style={{ gridColumn: '1 / -1' }}><label className="label">Note</label><input className="input-field" value={note} onChange={e => setNote(e.target.value)} /></div>
+          </div>
+
+          {/* Line items */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>Items to Purchase</span>
+              <button type="button" className="btn-secondary" style={{ padding: '5px 12px', fontSize: 12 }} onClick={addLine}><Plus size={13} /> Add Item</button>
+            </div>
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead><tr style={{ background: 'var(--bg-card)' }}>
+                  {['Product', 'Qty', 'Unit Cost', 'Discount', 'Subtotal', ''].map(h => (
+                    <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody>
+                  {lines.map((line, i) => {
+                    const sub = line.unitCost * line.quantity - line.discount;
+                    return (
+                      <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
+                        <td style={{ padding: '8px 12px' }}>
+                          <select className="input-field" style={{ padding: '5px 8px', fontSize: 12 }} value={line.productId} onChange={e => onProductChange(i, e.target.value)} required>
+                            <option value="">— Select —</option>
+                            {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                          </select>
+                        </td>
+                        <td style={{ padding: '8px 6px' }}><input type="number" step="1" min="1" style={{ width: 70, padding: '5px 8px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }} value={line.quantity} onChange={e => updateLine(i, 'quantity', Number(e.target.value))} /></td>
+                        <td style={{ padding: '8px 6px' }}><input type="number" step="0.01" min="0" style={{ width: 90, padding: '5px 8px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }} value={line.unitCost} onChange={e => updateLine(i, 'unitCost', Number(e.target.value))} /></td>
+                        <td style={{ padding: '8px 6px' }}><input type="number" step="0.01" min="0" style={{ width: 80, padding: '5px 8px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12 }} value={line.discount} onChange={e => updateLine(i, 'discount', Number(e.target.value))} /></td>
+                        <td style={{ padding: '8px 12px', fontSize: 13, fontWeight: 600, color: '#6366f1' }}>${sub.toFixed(2)}</td>
+                        <td style={{ padding: '8px 6px' }}>
+                          {lines.length > 1 && <button type="button" onClick={() => removeLine(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 4 }}><Trash2 size={13} /></button>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Total */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+            <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 20px', minWidth: 220 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}><span>Discount</span><span>-${parseFloat(discount || '0').toFixed(2)}</span></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, color: '#6366f1', borderTop: '1px solid var(--border)', paddingTop: 8 }}><span>Total</span><span>${total.toFixed(2)}</span></div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Create Purchase Order'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+export default function PurchasesPage() {
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [cancelling, setCancelling] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [p, s, pr] = await Promise.all([purchaseApi.getAll(), supplierApi.getAll(), productApi.getAll()]);
+      setPurchases(p); setSuppliers(s); setProducts(pr);
+    } catch { /* swallow */ }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = purchases.filter(p => {
+    const q = search.toLowerCase();
+    const matchQ = !q || (p.referenceCode ?? '').toLowerCase().includes(q) || (p.supplierName ?? '').toLowerCase().includes(q);
+    const matchS = !filterStatus || p.status === filterStatus;
+    return matchQ && matchS;
+  });
+
+  const handleCancel = async (id: string) => {
+    if (!confirm('Cancel this purchase? Stock will be deducted back.')) return;
+    setCancelling(id);
+    try { await purchaseApi.cancel(id); await load(); }
+    catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      alert(e?.response?.data?.message ?? 'Cannot cancel purchase');
+    } finally { setCancelling(null); }
+  };
+
+  const stats = {
+    total: purchases.length,
+    received: purchases.filter(p => p.status === 'RECEIVED').length,
+    totalSpend: purchases.filter(p => p.status === 'RECEIVED').reduce((acc, p) => acc + (p.totalAmount ?? 0), 0),
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Purchases</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Manage purchase orders and incoming stock</p>
+        </div>
+        <button id="create-purchase-btn" className="btn-primary" onClick={() => setModalOpen(true)}><Plus size={16} /> New Purchase</button>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+        {[
+          { label: 'Total Orders',   value: stats.total,    icon: ShoppingCart,  color: '#6366f1' },
+          { label: 'Received',       value: stats.received, icon: CheckCircle2,  color: '#10b981' },
+          { label: 'Total Spend',    value: `$${stats.totalSpend.toFixed(2)}`, icon: DollarSign, color: '#f59e0b' },
+        ].map(s => (
+          <div key={s.label} className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><s.icon size={20} color={s.color} /></div>
+            <div>
+              <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>{s.value}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{s.label}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search by PO # or supplier..." value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+        <select className="input-field" style={{ width: 160 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <option value="">All Status</option>
+          <option value="RECEIVED">Received</option>
+          <option value="PENDING">Pending</option>
+          <option value="PARTIAL">Partial</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+        <button className="btn-secondary" onClick={load}><RefreshCw size={15} /></button>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
+          <div className="animate-spin" style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
+          Loading purchases...
+        </div>
+      ) : (
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>PO Reference</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Delivery</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No purchase orders found</td></tr>
+              ) : filtered.map(p => (
+                <tr key={p.id}>
+                  <td style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{p.referenceCode ?? p.id.slice(0, 8)}</td>
+                  <td style={{ fontSize: 12 }}>{new Date(p.purchaseDate).toLocaleDateString()}</td>
+                  <td style={{ fontSize: 13 }}>
+                    {p.supplierName
+                      ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Truck size={12} />{p.supplierName}</span>
+                      : <span style={{ color: 'var(--text-muted)' }}>No supplier</span>}
+                  </td>
+                  <td style={{ fontSize: 12 }}>{p.deliveryDate ? new Date(p.deliveryDate).toLocaleDateString() : '—'}</td>
+                  <td style={{ fontSize: 12 }}>{p.items?.length ?? 0} items</td>
+                  <td style={{ fontSize: 14, fontWeight: 700, color: '#6366f1' }}>${(p.totalAmount ?? 0).toFixed(2)} <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.currency}</span></td>
+                  <td><StatusBadge status={p.status} /></td>
+                  <td>
+                    {p.status !== 'CANCELLED' && (
+                      <button id={`cancel-purchase-${p.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: cancelling === p.id ? 0.5 : 1 }} onClick={() => handleCancel(p.id)} disabled={cancelling === p.id} title="Cancel PO">
+                        <Ban size={13} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {modalOpen && (
+        <CreatePurchaseModal
+          suppliers={suppliers}
+          products={products}
+          onClose={() => setModalOpen(false)}
+          onSaved={async () => { setModalOpen(false); await load(); }}
+        />
+      )}
+    </div>
+  );
+}

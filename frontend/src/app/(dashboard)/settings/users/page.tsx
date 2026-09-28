@@ -4,25 +4,28 @@ import { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Pencil, Trash2, X, Loader2, Users as UsersIcon, RefreshCw } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, X, Loader2, Users as UsersIcon, RefreshCw, Lock } from 'lucide-react';
 import { userApi } from '@/lib/user-api';
 import { roleApi } from '@/lib/role-api';
 import { useAuthStore } from '@/store/auth-store';
 import type { User, Role } from '@/types';
+
+const isUserAdmin = (u: User) =>
+  u.roles?.some(r => r.name.toUpperCase() === 'ADMIN') || u.username.toLowerCase() === 'admin';
 
 const createSchema = z.object({
   username: z.string().min(3, 'Min 3 characters'),
   email: z.string().email('Invalid email'),
   password: z.string().min(8, 'Min 8 characters'),
   fullName: z.string().min(1, 'Full name required'),
-  roleIds: z.array(z.string()).min(1, 'Select at least one role'),
+  roleIds: z.array(z.string()).min(1, 'Please select a role').max(1, 'Please select only one role'),
 });
 
 const updateSchema = z.object({
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   fullName: z.string().optional(),
   active: z.boolean().optional(),
-  roleIds: z.array(z.string()).optional(),
+  roleIds: z.array(z.string()).min(1, 'Please select a role').max(1, 'Please select only one role').optional(),
 });
 
 type CreateForm = z.infer<typeof createSchema>;
@@ -72,12 +75,13 @@ export default function UsersPage() {
   );
 
   const openEdit = (user: User) => {
+    if (isUserAdmin(user)) return;
     setSelected(user);
     updateForm.reset({
       email: user.email,
       fullName: user.fullName,
       active: user.active,
-      roleIds: user.roles.map(r => r.id),
+      roleIds: user.roles && user.roles.length > 0 ? [user.roles[0].id] : [],
     });
     setModal('edit');
   };
@@ -96,7 +100,7 @@ export default function UsersPage() {
   };
 
   const handleUpdate = async (data: UpdateForm) => {
-    if (!selected) return;
+    if (!selected || isUserAdmin(selected)) return;
     setSaving(true); setError('');
     try {
       await userApi.update(selected.id, data);
@@ -109,12 +113,15 @@ export default function UsersPage() {
   };
 
   const handleDelete = async () => {
-    if (!selected) return;
+    if (!selected || isUserAdmin(selected)) return;
     setSaving(true);
     try {
       await userApi.delete(selected.id);
       setModal(null);
       load();
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } };
+      setError(err?.response?.data?.message || 'Failed to delete user');
     } finally { setSaving(false); }
   };
 
@@ -184,7 +191,7 @@ export default function UsersPage() {
                   <th>#</th>
                   <th>User</th>
                   <th>Username</th>
-                  <th>Roles</th>
+                  <th>Role</th>
                   <th>Status</th>
                   <th>Created</th>
                   <th>Actions</th>
@@ -238,14 +245,31 @@ export default function UsersPage() {
                       </td>
                       <td>
                         {isAdmin ? (
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }}>
-                              <Pencil size={13} />
-                            </button>
-                            <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }}>
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
+                          isUserAdmin(user) ? (
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              color: 'var(--text-muted)',
+                              background: 'rgba(255,255,255,0.05)',
+                              border: '1px solid var(--border-subtle)',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}>
+                              <Lock size={11} /> Protected
+                            </span>
+                          ) : (
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }}>
+                                <Pencil size={13} />
+                              </button>
+                              <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }}>
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          )
                         ) : (
                           <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>—</span>
                         )}
@@ -283,10 +307,10 @@ export default function UsersPage() {
               <FormField label="Password" error={createForm.formState.errors.password?.message}>
                 <input type="password" className="input-field" placeholder="Min 8 characters" autoComplete="new-password" {...createForm.register('password')} />
               </FormField>
-              <FormField label="Roles" error={createForm.formState.errors.roleIds?.message}>
+              <FormField label="Role" error={createForm.formState.errors.roleIds?.message}>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {roles.map(role => {
-                    const selected = createForm.watch('roleIds').includes(role.id);
+                    const selected = createForm.watch('roleIds')?.[0] === role.id;
                     return (
                       <label key={role.id} style={{
                         display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
@@ -295,12 +319,13 @@ export default function UsersPage() {
                         border: `1px solid ${selected ? 'rgba(99,102,241,0.4)' : 'var(--border-subtle)'}`,
                         transition: 'all 0.15s ease',
                       }}>
-                        <input type="checkbox" value={role.id}
+                        <input
+                          type="radio"
+                          name="createRole"
+                          value={role.id}
                           checked={selected}
-                          onChange={e => {
-                            const curr = createForm.getValues('roleIds');
-                            if (e.target.checked) createForm.setValue('roleIds', [...curr, role.id]);
-                            else createForm.setValue('roleIds', curr.filter(id => id !== role.id));
+                          onChange={() => {
+                            createForm.setValue('roleIds', [role.id], { shouldValidate: true });
                           }}
                           style={{ display: 'none' }}
                         />
@@ -347,10 +372,10 @@ export default function UsersPage() {
                   <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Active</span>
                 </label>
               </FormField>
-              <FormField label="Roles">
+              <FormField label="Role" error={updateForm.formState.errors.roleIds?.message}>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {roles.map(role => {
-                    const isSelected = updateForm.watch('roleIds')?.includes(role.id);
+                    const isSelected = updateForm.watch('roleIds')?.[0] === role.id;
                     return (
                       <label key={role.id} style={{
                         display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
@@ -359,12 +384,13 @@ export default function UsersPage() {
                         border: `1px solid ${isSelected ? 'rgba(99,102,241,0.4)' : 'var(--border-subtle)'}`,
                         transition: 'all 0.15s ease',
                       }}>
-                        <input type="checkbox" value={role.id}
-                          checked={!!isSelected}
-                          onChange={e => {
-                            const curr = updateForm.getValues('roleIds') || [];
-                            if (e.target.checked) updateForm.setValue('roleIds', [...curr, role.id]);
-                            else updateForm.setValue('roleIds', curr.filter(id => id !== role.id));
+                        <input
+                          type="radio"
+                          name="editRole"
+                          value={role.id}
+                          checked={isSelected}
+                          onChange={() => {
+                            updateForm.setValue('roleIds', [role.id], { shouldValidate: true });
                           }}
                           style={{ display: 'none' }}
                         />

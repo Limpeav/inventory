@@ -72,6 +72,10 @@ public class UserService {
     public User update(UUID id, UpdateUserRequest request) {
         User user = findById(id);
 
+        if (user.hasRole("ADMIN") || "admin".equalsIgnoreCase(user.getUsername())) {
+            throw new IllegalArgumentException("Admin user cannot be modified");
+        }
+
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
                 throw new ResourceAlreadyExistsException("Email already exists: " + request.getEmail());
@@ -96,8 +100,9 @@ public class UserService {
     }
 
     public void delete(UUID id) {
-        if (!userRepository.findById(id).isPresent()) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
+        User user = findById(id);
+        if (user.hasRole("ADMIN") || "admin".equalsIgnoreCase(user.getUsername())) {
+            throw new IllegalArgumentException("Admin user cannot be deleted");
         }
         userRepository.deleteById(id);
     }

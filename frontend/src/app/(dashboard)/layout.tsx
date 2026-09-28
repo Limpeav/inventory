@@ -5,7 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard, Users, Shield, Package, ChevronRight,
-  LogOut, Settings, Bell, Search
+  LogOut, Settings, Bell, ShoppingCart, Truck, UserCheck,
+  Tag, BarChart3, Warehouse, Receipt, RotateCcw, CreditCard
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
@@ -13,9 +14,18 @@ import Cookies from 'js-cookie';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'main' },
-  { href: '/settings/users', label: 'Users', icon: Users, section: 'settings', roles: ['ADMIN', 'MANAGER'] },
-  { href: '/settings/roles', label: 'Roles & Access', icon: Shield, section: 'settings', roles: ['ADMIN'] },
+  { href: '/dashboard',            label: 'Dashboard',   icon: LayoutDashboard, section: 'main' },
+  { href: '/products',             label: 'Products',    icon: Package,         section: 'inventory' },
+  { href: '/stock',                label: 'Stock',       icon: Warehouse,       section: 'inventory' },
+  { href: '/customers',            label: 'Customers',   icon: UserCheck,       section: 'inventory' },
+  { href: '/suppliers',            label: 'Suppliers',   icon: Truck,           section: 'inventory' },
+  { href: '/employees',            label: 'Employees',   icon: Users,           section: 'inventory', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/sales',                label: 'Sales',       icon: Receipt,         section: 'transactions' },
+  { href: '/purchases',            label: 'Purchases',   icon: ShoppingCart,    section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/returns',              label: 'Returns',     icon: RotateCcw,       section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/payments',             label: 'Payments',    icon: CreditCard,      section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/settings/users',       label: 'Users',       icon: Shield,          section: 'settings',  roles: ['ADMIN', 'MANAGER'] },
+  { href: '/settings/roles',       label: 'Roles & Access', icon: Settings,     section: 'settings',  roles: ['ADMIN'] },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,10 +40,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     const token = Cookies.get('accessToken');
-    if (!token && !isAuthenticated) {
+    const refreshToken = Cookies.get('refreshToken');
+    if (!token && !refreshToken) {
+      clearAuth();
       router.replace('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [clearAuth, router]);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch {}
@@ -48,6 +60,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   const mainItems = navItems.filter(i => i.section === 'main' && canAccess(i));
+  const inventoryItems = navItems.filter(i => i.section === 'inventory' && canAccess(i));
+  const transactionItems = navItems.filter(i => i.section === 'transactions' && canAccess(i));
   const settingsItems = navItems.filter(i => i.section === 'settings' && canAccess(i));
 
   return (
@@ -86,6 +100,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <NavLink key={item.href} item={item} active={pathname === item.href} />
             ))}
           </div>
+
+          {inventoryItems.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+                Inventory
+              </p>
+              {inventoryItems.map(item => (
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
+              ))}
+            </div>
+          )}
+
+          {transactionItems.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+                Transactions
+              </p>
+              {transactionItems.map(item => (
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
+              ))}
+            </div>
+          )}
 
           <div>
             <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>

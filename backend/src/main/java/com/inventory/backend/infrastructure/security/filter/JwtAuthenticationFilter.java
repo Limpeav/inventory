@@ -1,6 +1,7 @@
 package com.inventory.backend.infrastructure.security.filter;
 
 import com.inventory.backend.infrastructure.security.jwt.JwtTokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,6 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token expired: {}", e.getMessage());
         } catch (Exception e) {
             log.error("Cannot set user authentication: {}", e.getMessage());
         }
