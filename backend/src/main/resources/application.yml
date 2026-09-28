@@ -55,7 +55,7 @@ app:
     refresh-token-expiration: ${JWT_REFRESH_EXPIRATION:604800000}    # 7 days in ms
 
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:3000,https://inventory-rho-drab.vercel.app,https://*.vercel.app,*}
+    allowed-origins: ${CORS_ORIGINS:${CROS_ORIGINS:http://localhost:3000,https://inventory-limpeav.vercel.app,https://*-limpeav.vercel.app,https://inventory-rho-drab.vercel.app,https://*.vercel.app,*}}
 
   seed:
     enabled: ${APP_SEED_ENABLED:true}

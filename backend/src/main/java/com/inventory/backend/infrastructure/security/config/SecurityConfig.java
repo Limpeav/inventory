@@ -123,6 +123,8 @@ public class SecurityConfig {
         }
         if (!patterns.contains("http://localhost:3000")) patterns.add("http://localhost:3000");
         if (!patterns.contains("https://*.vercel.app")) patterns.add("https://*.vercel.app");
+        if (!patterns.contains("https://*-limpeav.vercel.app")) patterns.add("https://*-limpeav.vercel.app");
+        if (!patterns.contains("https://inventory-limpeav.vercel.app")) patterns.add("https://inventory-limpeav.vercel.app");
         if (!patterns.contains("https://inventory-rho-drab.vercel.app")) patterns.add("https://inventory-rho-drab.vercel.app");
         if (!patterns.contains("*")) patterns.add("*");
 
