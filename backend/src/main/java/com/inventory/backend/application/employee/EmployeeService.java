@@ -48,9 +48,8 @@ public class EmployeeService {
     }
 
     public void delete(UUID id) {
-        Employee employee = findById(id);
-        employee.setActive(false);
-        employeeRepository.save(employee);
+        findById(id);
+        employeeRepository.deleteById(id);
     }
 
     private void mapToEmployee(CreateEmployeeRequest request, Employee employee) {

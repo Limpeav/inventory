@@ -4,6 +4,7 @@ import com.inventory.backend.domain.category.Category;
 import com.inventory.backend.domain.category.CategoryRepository;
 import com.inventory.backend.domain.product.Product;
 import com.inventory.backend.domain.product.ProductRepository;
+import com.inventory.backend.domain.stock.StockRepository;
 import com.inventory.backend.presentation.dto.request.CreateProductRequest;
 import com.inventory.backend.presentation.exception.ResourceAlreadyExistsException;
 import com.inventory.backend.presentation.exception.ResourceNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +23,13 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final StockRepository stockRepository;
 
     @Transactional(readOnly = true)
     public List<Product> findAll() {
-        return productRepository.findAll();
+        return productRepository.findAll().stream()
+                .filter(p -> !p.isDeleted())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -77,9 +82,9 @@ public class ProductService {
     }
 
     public void delete(UUID id) {
-        Product product = findById(id);
-        product.markDeleted();
-        productRepository.save(product);
+        findById(id);
+        stockRepository.deleteByProductId(id);
+        productRepository.deleteById(id);
     }
 
     private void mapRequestToProduct(CreateProductRequest request, Product product) {

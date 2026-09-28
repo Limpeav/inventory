@@ -14,4 +14,6 @@ public interface JpaStockRepository extends JpaRepository<StockItemEntity, UUID>
 
     @Query("SELECT s FROM StockItemEntity s WHERE s.quantity <= :threshold")
     List<StockItemEntity> findLowStock(@Param("threshold") double threshold);
+
+    void deleteByProductId(UUID productId);
 }

@@ -203,7 +203,7 @@ export default function ProductsPage() {
 
   const stats = {
     total: products.length,
-    active: products.filter(p => !p.hidden && !p.deleted).length,
+    active: products.filter(p => !p.hidden).length,
     hidden: products.filter(p => p.hidden).length,
   };
 
@@ -294,11 +294,9 @@ export default function ProductsPage() {
                   <td style={{ fontSize: 13, fontWeight: 600, color: '#10b981' }}>{p.price != null ? `$${Number(p.price).toFixed(2)}` : '—'}</td>
                   <td style={{ fontSize: 12 }}>{p.reorderLevel ?? 0}</td>
                   <td>
-                    {p.deleted
-                      ? <span className="badge badge-inactive">Deleted</span>
-                      : p.hidden
-                        ? <span className="badge" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}><EyeOff size={11} /> Hidden</span>
-                        : <span className="badge badge-active"><Eye size={11} /> Active</span>}
+                    {p.hidden
+                      ? <span className="badge" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}><EyeOff size={11} /> Hidden</span>
+                      : <span className="badge badge-active"><Eye size={11} /> Active</span>}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 6 }}>

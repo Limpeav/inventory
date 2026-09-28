@@ -9,4 +9,5 @@ public interface StockRepository {
     Optional<StockItem> findByProductId(UUID productId);
     List<StockItem> findAll();
     List<StockItem> findLowStock(double threshold);
+    void deleteByProductId(UUID productId);
 }

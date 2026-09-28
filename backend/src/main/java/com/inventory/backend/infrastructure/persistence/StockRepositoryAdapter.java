@@ -38,4 +38,9 @@ public class StockRepositoryAdapter implements StockRepository {
     public List<StockItem> findLowStock(double threshold) {
         return jpaRepo.findLowStock(threshold).stream().map(mapper::toDomain).collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteByProductId(UUID productId) {
+        jpaRepo.deleteByProductId(productId);
+    }
 }
