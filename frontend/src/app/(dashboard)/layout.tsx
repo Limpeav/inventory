@@ -68,15 +68,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
       {/* Sidebar */}
-      <aside className="sidebar" style={{ zIndex: 40 }}>
+      <aside
+        className="sidebar"
+        style={{
+          width: '260px',
+          height: '100vh',
+          maxHeight: '100vh',
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          background: 'var(--bg-surface)',
+          borderRight: '1px solid var(--border-subtle)',
+          zIndex: 40,
+          overflow: 'hidden',
+        }}
+      >
         {/* Logo */}
         <div style={{
-          padding: '24px 20px',
+          padding: '18px 18px',
           borderBottom: '1px solid var(--border-subtle)',
+          flexShrink: 0,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '40px', height: '40px', borderRadius: '12px',
+              width: '38px', height: '38px', borderRadius: '12px',
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 4px 15px rgba(99,102,241,0.35)',
@@ -92,9 +111,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, minHeight: 0, padding: '16px 12px', overflowY: 'auto' }}>
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+        <nav style={{
+          flex: '1 1 0%',
+          minHeight: 0,
+          padding: '12px 10px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}>
+          <div style={{ marginBottom: '14px' }}>
+            <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
               Main
             </p>
             {mainItems.map(item => (
@@ -103,8 +128,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           {inventoryItems.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
                 Inventory
               </p>
               {inventoryItems.map(item => (
@@ -114,8 +139,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
 
           {transactionItems.length > 0 && (
-            <div style={{ marginBottom: '24px' }}>
-              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
                 Transactions
               </p>
               {transactionItems.map(item => (
@@ -124,8 +149,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           )}
 
-          <div>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
+          <div style={{ marginBottom: '8px' }}>
+            <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
               Settings
             </p>
             {settingsItems.map(item => (
@@ -136,20 +161,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* User section */}
         <div style={{
-          padding: '16px 12px',
+          padding: '12px',
           borderTop: '1px solid var(--border-subtle)',
+          background: 'var(--bg-surface)',
+          flexShrink: 0,
+          marginTop: 'auto',
         }}>
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '10px 12px', borderRadius: '10px',
+            padding: '8px 10px', borderRadius: '10px',
             background: 'var(--bg-subtle)',
             marginBottom: '8px',
           }}>
             <div style={{
-              width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0,
+              width: '34px', height: '34px', borderRadius: '50%', flexShrink: 0,
               background: 'linear-gradient(135deg, #6366f1, #818cf8)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '700', color: 'white',
+              fontSize: '13px', fontWeight: '700', color: 'white',
             }}>
               {mounted && user?.fullName ? user.fullName[0].toUpperCase() : 'U'}
             </div>
@@ -164,25 +192,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
 
           <button
-            id="logout-btn"
+            id="sidebar-logout-btn"
             onClick={handleLogout}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
-              padding: '9px 12px', borderRadius: '8px', background: 'none', border: 'none',
-              cursor: 'pointer', color: 'var(--text-muted)', fontSize: '13px', fontWeight: '500',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '9px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'rgba(239, 68, 68, 0.08)',
+              color: '#f87171',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
               transition: 'all 0.15s ease',
             }}
             onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.1)';
-              (e.currentTarget as HTMLButtonElement).style.color = '#f87171';
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.2)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.background = 'none';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
+              (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.08)';
             }}
+            title="Sign out of your account"
           >
             <LogOut size={15} />
-            Sign Out
+            <span>Logout</span>
           </button>
         </div>
       </aside>

@@ -306,6 +306,14 @@ tbody td {
   overflow: hidden;
 }
 
+.sidebar nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar nav::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
