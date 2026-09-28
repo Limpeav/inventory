@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -22,6 +22,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, clearAuth, hasRole } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const token = Cookies.get('accessToken');
@@ -38,6 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const canAccess = (item: typeof navItems[0]) => {
     if (!item.roles) return true;
+    if (!mounted) return true;
     return item.roles.some(r => hasRole(r));
   };
 
@@ -108,14 +114,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '14px', fontWeight: '700', color: 'white',
             }}>
-              {user?.fullName?.[0]?.toUpperCase() || 'A'}
+              {mounted && user?.fullName ? user.fullName[0].toUpperCase() : 'U'}
             </div>
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.fullName || 'Admin'}
+                {mounted && user?.fullName ? user.fullName : 'Account'}
               </p>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.roles?.[0] || 'ADMIN'}
+                {mounted && user?.roles?.[0] ? user.roles[0] : 'Signed in'}
               </p>
             </div>
           </div>

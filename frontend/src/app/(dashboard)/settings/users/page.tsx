@@ -30,7 +30,13 @@ type UpdateForm = z.infer<typeof updateSchema>;
 
 export default function UsersPage() {
   const { hasRole } = useAuthStore();
-  const isAdmin = hasRole('ADMIN');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isAdmin = mounted && hasRole('ADMIN');
 
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -408,8 +414,6 @@ export default function UsersPage() {
           </div>
         </div>
       )}
-
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
