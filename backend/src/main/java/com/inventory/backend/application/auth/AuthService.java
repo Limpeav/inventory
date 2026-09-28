@@ -26,12 +26,18 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public AuthResponse login(LoginRequest request) {
+        String identifier = request.getIdentifier();
+        if (identifier == null || identifier.isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(identifier, request.getPassword())
         );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        User user = userRepository.findByUsername(request.getUsername())
+        UserDetails userDetails = userDetailsService.loadUserByUsername(identifier);
+        User user = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByUsername(identifier))
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);

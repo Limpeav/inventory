@@ -1,8 +1,9 @@
 // Types for Auth & RBAC
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
+  username?: string;
 }
 
 export interface ForgotPasswordRequest {

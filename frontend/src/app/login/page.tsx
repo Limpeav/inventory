@@ -6,12 +6,12 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock, User, Package, AlertCircle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Package, AlertCircle, Loader2 } from 'lucide-react';
 import { authApi } from '@/lib/auth-api';
 import { useAuthStore } from '@/store/auth-store';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -51,7 +51,7 @@ export default function LoginPage() {
       }
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
-      setError(axiosErr?.response?.data?.message || 'Invalid username or password');
+      setError(axiosErr?.response?.data?.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -115,25 +115,25 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* Username */}
+            {/* Email */}
             <div style={{ marginBottom: '18px' }}>
-              <label className="label" htmlFor="username">Username</label>
+              <label className="label" htmlFor="email">Email</label>
               <div style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
-                  <User size={16} />
+                  <Mail size={16} />
                 </div>
                 <input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  className={`input-field ${errors.username ? 'error' : ''}`}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className={`input-field ${errors.email ? 'error' : ''}`}
                   style={{ paddingLeft: '42px' }}
-                  {...register('username')}
+                  {...register('email')}
                 />
               </div>
-              {errors.username && (
+              {errors.email && (
                 <p style={{ color: '#f87171', fontSize: '12px', marginTop: '6px' }}>
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
