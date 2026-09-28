@@ -33,6 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { user, isAuthenticated, clearAuth, hasRole } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -91,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
+        <nav style={{ flex: 1, minHeight: 0, padding: '16px 12px', overflowY: 'auto' }}>
           <div style={{ marginBottom: '24px' }}>
             <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '6px' }}>
               Main
@@ -220,16 +221,105 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
               transition: 'all 0.15s ease',
-            }}>
+            }} title="Notifications">
               <Bell size={16} />
             </button>
-            <div style={{
-              width: '36px', height: '36px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '14px', fontWeight: '700', color: 'white', cursor: 'pointer',
-            }}>
-              {user?.fullName?.[0]?.toUpperCase() || 'A'}
+
+            {/* Top Bar Logout Button */}
+            <button
+              id="top-logout-btn"
+              onClick={handleLogout}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '7px 12px', borderRadius: '10px',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                background: 'rgba(239, 68, 68, 0.08)',
+                color: '#f87171', fontSize: '13px', fontWeight: '600',
+                cursor: 'pointer', transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.2)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.08)';
+              }}
+              title="Sign out of your account"
+            >
+              <LogOut size={15} />
+              <span>Logout</span>
+            </button>
+
+            {/* Profile Dropdown */}
+            <div style={{ position: 'relative' }}>
+              <div
+                id="header-user-avatar"
+                onClick={() => setUserMenuOpen(prev => !prev)}
+                style={{
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '14px', fontWeight: '700', color: 'white', cursor: 'pointer',
+                  boxShadow: userMenuOpen ? '0 0 0 2px var(--brand-primary)' : 'none',
+                  transition: 'all 0.15s ease',
+                }}
+                title={mounted && user?.fullName ? user.fullName : 'Profile'}
+              >
+                {mounted && user?.fullName ? user.fullName[0].toUpperCase() : 'A'}
+              </div>
+
+              {userMenuOpen && (
+                <>
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 90 }}
+                    onClick={() => setUserMenuOpen(false)}
+                  />
+                  <div style={{
+                    position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+                    width: '230px', borderRadius: '12px',
+                    background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                    padding: '8px', zIndex: 100, animation: 'fadeIn 0.15s ease',
+                  }}>
+                    <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '6px' }}>
+                      <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                        {mounted && user?.fullName ? user.fullName : 'Account'}
+                      </p>
+                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {mounted && user?.email ? user.email : ''}
+                      </p>
+                      <div style={{ marginTop: '6px' }}>
+                        <span className="badge badge-role" style={{ fontSize: '10px', padding: '2px 6px' }}>
+                          {mounted && user?.roles?.[0] ? user.roles[0] : 'User'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      id="dropdown-logout-btn"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        handleLogout();
+                      }}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
+                        padding: '10px 12px', borderRadius: '8px',
+                        background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)',
+                        color: '#f87171', fontSize: '13px', fontWeight: '600',
+                        cursor: 'pointer', transition: 'all 0.15s ease',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.2)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.08)';
+                      }}
+                    >
+                      <LogOut size={15} />
+                      Log Out
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </header>
