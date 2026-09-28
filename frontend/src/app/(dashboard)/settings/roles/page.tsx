@@ -39,9 +39,11 @@ export default function RolesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [rolesRes, permsRes] = await Promise.all([roleApi.getAll(), roleApi.getAllPermissions()]);
-      if (rolesRes.success) setRoles(rolesRes.data);
-      if (permsRes.success) setPermissions(permsRes.data);
+      const [rolesRes, permsRes] = await Promise.allSettled([roleApi.getAll(), roleApi.getAllPermissions()]);
+      if (rolesRes.status === 'fulfilled' && rolesRes.value?.success) setRoles(rolesRes.value.data);
+      if (permsRes.status === 'fulfilled' && permsRes.value?.success) setPermissions(permsRes.value.data);
+    } catch {
+      // Gracefully handle any unexpected errors
     } finally {
       setLoading(false);
     }

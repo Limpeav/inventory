@@ -14,14 +14,14 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, section: 'main' },
-  { href: '/settings/users', label: 'Users', icon: Users, section: 'settings' },
-  { href: '/settings/roles', label: 'Roles & Access', icon: Shield, section: 'settings' },
+  { href: '/settings/users', label: 'Users', icon: Users, section: 'settings', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/settings/roles', label: 'Roles & Access', icon: Shield, section: 'settings', roles: ['ADMIN'] },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, clearAuth } = useAuthStore();
+  const { user, isAuthenticated, clearAuth, hasRole } = useAuthStore();
 
   useEffect(() => {
     const token = Cookies.get('accessToken');
@@ -36,8 +36,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.replace('/login');
   };
 
-  const mainItems = navItems.filter(i => i.section === 'main');
-  const settingsItems = navItems.filter(i => i.section === 'settings');
+  const canAccess = (item: typeof navItems[0]) => {
+    if (!item.roles) return true;
+    return item.roles.some(r => hasRole(r));
+  };
+
+  const mainItems = navItems.filter(i => i.section === 'main' && canAccess(i));
+  const settingsItems = navItems.filter(i => i.section === 'settings' && canAccess(i));
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>

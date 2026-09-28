@@ -22,29 +22,32 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/roles")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
 
     private final RoleService roleService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<RoleResponse>>> findAll() {
         return ResponseEntity.ok(ApiResponse.success(
                 roleService.findAll().stream().map(this::toResponse).collect(Collectors.toList())));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<RoleResponse>> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(roleService.findById(id))));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoleResponse>> create(@Valid @RequestBody CreateRoleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Role created successfully", toResponse(roleService.create(request))));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoleResponse>> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateRoleRequest request) {
@@ -52,12 +55,14 @@ public class RoleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         roleService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/permissions")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<PermissionResponse>>> findAllPermissions() {
         return ResponseEntity.ok(ApiResponse.success(
                 roleService.findAllPermissions().stream().map(this::toPermissionResponse).collect(Collectors.toList())));

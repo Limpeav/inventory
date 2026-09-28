@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Plus, Search, Pencil, Trash2, X, Loader2, Users as UsersIcon, RefreshCw } from 'lucide-react';
 import { userApi } from '@/lib/user-api';
 import { roleApi } from '@/lib/role-api';
+import { useAuthStore } from '@/store/auth-store';
 import type { User, Role } from '@/types';
 
 const createSchema = z.object({
@@ -28,6 +29,9 @@ type CreateForm = z.infer<typeof createSchema>;
 type UpdateForm = z.infer<typeof updateSchema>;
 
 export default function UsersPage() {
+  const { hasRole } = useAuthStore();
+  const isAdmin = hasRole('ADMIN');
+
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,9 +47,11 @@ export default function UsersPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [usersRes, rolesRes] = await Promise.all([userApi.getAll(), roleApi.getAll()]);
-      if (usersRes.success) setUsers(usersRes.data);
-      if (rolesRes.success) setRoles(rolesRes.data);
+      const [usersRes, rolesRes] = await Promise.allSettled([userApi.getAll(), roleApi.getAll()]);
+      if (usersRes.status === 'fulfilled' && usersRes.value?.success) setUsers(usersRes.value.data);
+      if (rolesRes.status === 'fulfilled' && rolesRes.value?.success) setRoles(rolesRes.value.data);
+    } catch {
+      // Gracefully handle any unexpected errors
     } finally {
       setLoading(false);
     }
@@ -120,9 +126,11 @@ export default function UsersPage() {
           <button className="btn-secondary" onClick={load} id="refresh-users">
             <RefreshCw size={14} /> Refresh
           </button>
-          <button className="btn-primary" onClick={() => { setModal('create'); setError(''); createForm.reset({ roleIds: [] }); }} id="create-user-btn">
-            <Plus size={16} /> Add User
-          </button>
+          {isAdmin && (
+            <button className="btn-primary" onClick={() => { setModal('create'); setError(''); createForm.reset({ roleIds: [] }); }} id="create-user-btn">
+              <Plus size={16} /> Add User
+            </button>
+          )}
         </div>
       </div>
 
@@ -223,14 +231,18 @@ export default function UsersPage() {
                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }}>
-                            <Pencil size={13} />
-                          </button>
-                          <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }}>
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
+                        {isAdmin ? (
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }}>
+                              <Pencil size={13} />
+                            </button>
+                            <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }}>
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>—</span>
+                        )}
                       </td>
                     </tr>
                   ))
