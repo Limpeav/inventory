@@ -82,8 +82,8 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-        const newToken = data.data.accessToken;
-        Cookies.set('accessToken', newToken, { expires: 1 });
+        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+        Cookies.set('accessToken', newToken, { expires: 1, sameSite: 'lax', secure: isSecure });
         api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
