@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { stockApi, StockItem } from '@/lib/stock-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   Warehouse, AlertTriangle, RefreshCw, Search,
-  TrendingDown, Package, CheckCircle, Sliders
+  Package, CheckCircle, Sliders
 } from 'lucide-react';
 
 export default function StockPage() {
+  const { t } = useTranslation();
   const [stock, setStock] = useState<StockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -42,7 +44,7 @@ export default function StockPage() {
       await load();
       setAdjustDelta(p => ({ ...p, [productId]: '' }));
     } catch {
-      alert('Adjustment failed');
+      alert(t('adjustmentFailed'));
     } finally {
       setAdjusting(null);
     }
@@ -57,18 +59,18 @@ export default function StockPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Stock Levels</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Monitor inventory quantities and adjust stock on-hand</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('stockLevels')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('stockSubtitle')}</p>
         </div>
-        <button className="btn-secondary" onClick={load}><RefreshCw size={15} /> Refresh</button>
+        <button className="btn-secondary" onClick={load}><RefreshCw size={15} /> {t('refresh')}</button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {[
-          { label: 'Products Tracked', value: totalItems, icon: Package, color: '#6366f1' },
-          { label: 'Low Stock Alerts',  value: lowStockCount, icon: AlertTriangle, color: lowStockCount > 0 ? '#ef4444' : '#10b981' },
-          { label: 'Total Units',       value: totalQty.toFixed(0), icon: Warehouse, color: '#10b981' },
+          { label: t('productsTracked'), value: totalItems, icon: Package, color: '#6366f1' },
+          { label: t('lowStockAlerts'),  value: lowStockCount, icon: AlertTriangle, color: lowStockCount > 0 ? '#ef4444' : '#10b981' },
+          { label: t('totalUnits'),       value: totalQty.toFixed(0), icon: Warehouse, color: '#10b981' },
         ].map(s => (
           <div key={s.label} className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -86,14 +88,14 @@ export default function StockPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search by product name or barcode..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchStockPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <button
           className={showLowOnly ? 'btn-primary' : 'btn-secondary'}
           onClick={() => setShowLowOnly(p => !p)}
           style={{ display: 'flex', alignItems: 'center', gap: 6 }}
         >
-          <AlertTriangle size={14} /> {showLowOnly ? 'All Items' : 'Low Stock Only'}
+          <AlertTriangle size={14} /> {showLowOnly ? t('allItems') : t('lowStockOnly')}
         </button>
       </div>
 
@@ -101,26 +103,26 @@ export default function StockPage() {
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
           <div className="animate-spin" style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
-          Loading stock...
+          {t('loadingStock')}
         </div>
       ) : (
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Product</th>
-                <th>Barcode</th>
-                <th>In Stock</th>
-                <th>Reserved</th>
-                <th>Available</th>
-                <th>Reorder At</th>
-                <th>Status</th>
-                <th>Adjust</th>
+                <th>{t('colProduct')}</th>
+                <th>{t('colBarcode')}</th>
+                <th>{t('colInStock')}</th>
+                <th>{t('colReserved')}</th>
+                <th>{t('colAvailable')}</th>
+                <th>{t('colReorderAt')}</th>
+                <th>{t('colStatus')}</th>
+                <th>{t('colAdjust')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No stock records found</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noStockRecords')}</td></tr>
               ) : filtered.map(s => (
                 <tr key={s.productId} style={{ background: s.lowStock ? 'rgba(239,68,68,0.04)' : undefined }}>
                   <td>
@@ -137,9 +139,9 @@ export default function StockPage() {
                   <td>
                     {s.lowStock
                       ? <span className="badge" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
-                          <AlertTriangle size={11} /> Low Stock
+                          <AlertTriangle size={11} /> {t('lowStockCount')}
                         </span>
-                      : <span className="badge badge-active"><CheckCircle size={11} /> OK</span>}
+                      : <span className="badge badge-active"><CheckCircle size={11} /> {t('ok')}</span>}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -157,7 +159,7 @@ export default function StockPage() {
                         style={{ padding: '5px 10px', opacity: adjusting === s.productId ? 0.5 : 1 }}
                         onClick={() => handleAdjust(s.productId)}
                         disabled={adjusting === s.productId}
-                        title="Apply adjustment"
+                        title={t('applyAdjustment')}
                       >
                         <Sliders size={13} />
                       </button>

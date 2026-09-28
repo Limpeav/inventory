@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { customerApi, Customer, CreateCustomerRequest } from '@/lib/customer-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   UserCheck, Plus, Pencil, Trash2, X, Search, AlertCircle,
   Phone, MapPin, DollarSign, RefreshCw, CreditCard
@@ -17,6 +18,7 @@ function CustomerModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<CreateCustomerRequest>({
     customerId: customer?.customerId ?? '',
     name: customer?.name ?? '',
@@ -66,7 +68,7 @@ function CustomerModal({
       <div className="modal-content" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-            {customer ? 'Edit Customer' : 'Add Customer'}
+            {customer ? t('editCustomer') : t('addCustomer')}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
             <X size={20} />
@@ -82,58 +84,58 @@ function CustomerModal({
         <form onSubmit={submit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
-              <label className="label">Customer ID</label>
+              <label className="label">{t('customerId')}</label>
               <input className="input-field" value={form.customerId} onChange={e => handle('customerId', e.target.value)} placeholder="e.g. CUS-001" />
             </div>
             <div>
-              <label className="label">Status</label>
+              <label className="label">{t('status')}</label>
               <select className="input-field" value={form.status} onChange={e => handle('status', Number(e.target.value))}>
-                <option value={0}>Active</option>
-                <option value={1}>Inactive</option>
+                <option value={0}>{t('active')}</option>
+                <option value={1}>{t('inactive')}</option>
               </select>
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Customer Name *</label>
+              <label className="label">{t('customerNameRequired')}</label>
               <input className="input-field" required value={form.name} onChange={e => handle('name', e.target.value)} placeholder="Full name or company name" />
             </div>
             <div>
-              <label className="label">Phone</label>
+              <label className="label">{t('phone')}</label>
               <input className="input-field" value={form.phone} onChange={e => handle('phone', e.target.value)} placeholder="+855 xx xxx xxx" />
             </div>
             <div>
-              <label className="label">Fax</label>
+              <label className="label">{t('fax')}</label>
               <input className="input-field" value={form.fax} onChange={e => handle('fax', e.target.value)} placeholder="Fax number" />
             </div>
             <div>
-              <label className="label">Email</label>
+              <label className="label">{t('email')}</label>
               <input className="input-field" type="email" value={form.email} onChange={e => handle('email', e.target.value)} placeholder="customer@email.com" />
             </div>
             <div>
-              <label className="label">Province</label>
+              <label className="label">{t('province')}</label>
               <input className="input-field" value={form.province} onChange={e => handle('province', e.target.value)} placeholder="Province / City" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Address</label>
+              <label className="label">{t('address')}</label>
               <input className="input-field" value={form.address} onChange={e => handle('address', e.target.value)} placeholder="Full address" />
             </div>
             <div>
-              <label className="label">Credit Limit ($)</label>
+              <label className="label">{t('creditLimit')}</label>
               <input className="input-field" type="number" step="0.01" min="0" value={form.creditLimit} onChange={e => handle('creditLimit', e.target.value)} />
             </div>
             <div>
-              <label className="label">Credit Days</label>
+              <label className="label">{t('creditDays')}</label>
               <input className="input-field" type="number" min="0" value={form.creditDays} onChange={e => handle('creditDays', e.target.value)} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Description / Notes</label>
+              <label className="label">{t('notes')}</label>
               <textarea className="input-field" rows={3} value={form.description} onChange={e => handle('description', e.target.value)} style={{ resize: 'vertical' }} />
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : customer ? 'Save Changes' : 'Create Customer'}
+              {saving ? t('saving') : customer ? t('saveChanges') : t('createCustomer')}
             </button>
           </div>
         </form>
@@ -144,6 +146,7 @@ function CustomerModal({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function CustomersPage() {
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -169,7 +172,7 @@ export default function CustomersPage() {
   });
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this customer?')) return;
+    if (!confirm(t('deleteCustomerConfirm'))) return;
     setDeleting(id);
     try { await customerApi.delete(id); await load(); }
     catch { alert('Cannot delete — customer may be in use.'); }
@@ -192,20 +195,20 @@ export default function CustomersPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Customers</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Manage your customer accounts and credit limits</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('customers')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('manageCustomers')}</p>
         </div>
         <button id="create-customer-btn" className="btn-primary" onClick={openCreate}>
-          <Plus size={16} /> Add Customer
+          <Plus size={16} /> {t('addCustomer')}
         </button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {[
-          { label: 'Total Customers', value: stats.total,    icon: UserCheck,   color: '#6366f1' },
-          { label: 'Active',          value: stats.active,   icon: UserCheck,   color: '#10b981' },
-          { label: 'Inactive',        value: stats.inactive, icon: CreditCard,  color: '#ef4444' },
+          { label: t('totalCustomers'), value: stats.total,    icon: UserCheck,   color: '#6366f1' },
+          { label: t('active'),          value: stats.active,   icon: UserCheck,   color: '#10b981' },
+          { label: t('inactive'),        value: stats.inactive, icon: CreditCard,  color: '#ef4444' },
         ].map(s => (
           <div key={s.label} className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -223,39 +226,39 @@ export default function CustomersPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search by name, ID, phone, email..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchCustomersPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="input-field" style={{ width: 160 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="">All Status</option>
-          <option value="0">Active</option>
-          <option value="1">Inactive</option>
+          <option value="">{t('allStatus')}</option>
+          <option value="0">{t('active')}</option>
+          <option value="1">{t('inactive')}</option>
         </select>
-        <button className="btn-secondary" onClick={load} title="Refresh"><RefreshCw size={15} /></button>
+        <button className="btn-secondary" onClick={load} title={t('refresh')}><RefreshCw size={15} /></button>
       </div>
 
       {/* Table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
           <div className="animate-spin" style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
-          Loading customers...
+          {t('loadingCustomers')}
         </div>
       ) : (
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Customer</th>
-                <th>Contact</th>
-                <th>Province</th>
-                <th>Credit Limit</th>
-                <th>Credit Days</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{t('colCustomer')}</th>
+                <th>{t('colContact')}</th>
+                <th>{t('colProvince')}</th>
+                <th>{t('colCreditLimit')}</th>
+                <th>{t('colCreditDays')}</th>
+                <th>{t('colStatus')}</th>
+                <th>{t('colActions')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No customers found</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noCustomersFound')}</td></tr>
               ) : filtered.map(c => (
                 <tr key={c.id}>
                   <td>
@@ -274,16 +277,16 @@ export default function CustomersPage() {
                       <DollarSign size={12} />{c.creditLimit != null ? Number(c.creditLimit).toFixed(2) : '0.00'}
                     </span>
                   </td>
-                  <td style={{ fontSize: 13 }}>{c.creditDays ?? 0} days</td>
+                  <td style={{ fontSize: 13 }}>{c.creditDays ?? 0} {t('days')}</td>
                   <td>
                     {c.status === 0
-                      ? <span className="badge badge-active">Active</span>
-                      : <span className="badge badge-inactive">Inactive</span>}
+                      ? <span className="badge badge-active">{t('active')}</span>
+                      : <span className="badge badge-inactive">{t('inactive')}</span>}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button id={`edit-customer-${c.id}`} className="btn-secondary" style={{ padding: '5px 10px' }} onClick={() => openEdit(c)}><Pencil size={13} /></button>
-                      <button id={`delete-customer-${c.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: deleting === c.id ? 0.5 : 1 }} onClick={() => handleDelete(c.id)} disabled={deleting === c.id}><Trash2 size={13} /></button>
+                      <button id={`edit-customer-${c.id}`} className="btn-secondary" style={{ padding: '5px 10px' }} onClick={() => openEdit(c)} title={t('edit')}><Pencil size={13} /></button>
+                      <button id={`delete-customer-${c.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: deleting === c.id ? 0.5 : 1 }} onClick={() => handleDelete(c.id)} disabled={deleting === c.id} title={t('delete')}><Trash2 size={13} /></button>
                     </div>
                   </td>
                 </tr>

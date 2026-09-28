@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Pencil, Trash2, X, Loader2, Shield, Lock, RefreshCw } from 'lucide-react';
 import { roleApi } from '@/lib/role-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import type { Role, Permission } from '@/types';
 
 const createSchema = z.object({
@@ -23,6 +24,7 @@ type CreateForm = z.infer<typeof createSchema>;
 type UpdateForm = z.infer<typeof updateSchema>;
 
 export default function RolesPage() {
+  const { t } = useTranslation();
   const [roles, setRoles] = useState<Role[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,15 +110,15 @@ export default function RolesPage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)' }}>Roles & Access Control</h1>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)' }}>{t('rolesAndAccess')}</h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Define roles and assign granular permissions
+            {t('rolesSubtitle')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn-secondary" onClick={load} id="refresh-roles"><RefreshCw size={14} /> Refresh</button>
+          <button className="btn-secondary" onClick={load} id="refresh-roles" title={t('refresh')}><RefreshCw size={14} /> {t('refresh')}</button>
           <button className="btn-primary" onClick={() => { setModal('create'); setError(''); createForm.reset({ permissionIds: [] }); }} id="create-role-btn">
-            <Plus size={16} /> Add Role
+            <Plus size={16} /> {t('addRole')}
           </button>
         </div>
       </div>
@@ -125,7 +127,7 @@ export default function RolesPage() {
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px', gap: '12px', color: 'var(--text-muted)' }}>
           <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-          Loading roles...
+          {t('loadingRoles')}
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
@@ -146,14 +148,14 @@ export default function RolesPage() {
                   </div>
                   <div>
                     <p style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>{role.name}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{role.permissions.length} permissions</p>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{role.permissions.length} {t('permissions')}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  <button className="btn-secondary" onClick={() => openEdit(role)} style={{ padding: '6px 10px' }}>
+                  <button className="btn-secondary" onClick={() => openEdit(role)} style={{ padding: '6px 10px' }} title={t('edit')}>
                     <Pencil size={13} />
                   </button>
-                  <button className="btn-danger" onClick={() => { setSelected(role); setModal('delete'); }} style={{ padding: '6px 10px' }}>
+                  <button className="btn-danger" onClick={() => { setSelected(role); setModal('delete'); }} style={{ padding: '6px 10px' }} title={t('delete')}>
                     <Trash2 size={13} />
                   </button>
                 </div>
@@ -188,7 +190,7 @@ export default function RolesPage() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Create New Role</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{t('createRole')}</h2>
               <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={20} />
               </button>
@@ -196,26 +198,28 @@ export default function RolesPage() {
             {error && <div style={{ padding: '10px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
             <form onSubmit={createForm.handleSubmit(handleCreate)}>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Role Name</label>
+                <label className="label">{t('roleName')}</label>
                 <input className="input-field" placeholder="e.g. SUPERVISOR" style={{ textTransform: 'uppercase' }} {...createForm.register('name')} />
                 {createForm.formState.errors.name && <p style={{ color: '#f87171', fontSize: '12px', marginTop: '4px' }}>{createForm.formState.errors.name.message}</p>}
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Description</label>
+                <label className="label">{t('description')}</label>
                 <textarea className="input-field" placeholder="Describe this role..." rows={2} style={{ resize: 'vertical' }} {...createForm.register('description')} />
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Permissions</label>
+                <label className="label">{t('permissions')}</label>
                 <PermissionPicker
                   grouped={grouped}
                   selected={createForm.watch('permissionIds')}
                   onChange={ids => createForm.setValue('permissionIds', ids)}
+                  selectAllText={t('selectAll')}
+                  clearAllText={t('clearAll')}
                 />
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Create Role'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('createRole')}
                 </button>
               </div>
             </form>
@@ -228,7 +232,7 @@ export default function RolesPage() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Edit Role: {selected.name}</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{t('editRole')}: {selected.name}</h2>
               <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={20} />
               </button>
@@ -236,21 +240,23 @@ export default function RolesPage() {
             {error && <div style={{ padding: '10px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
             <form onSubmit={updateForm.handleSubmit(handleUpdate)}>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Description</label>
+                <label className="label">{t('description')}</label>
                 <textarea className="input-field" rows={2} style={{ resize: 'vertical' }} {...updateForm.register('description')} />
               </div>
               <div style={{ marginBottom: '16px' }}>
-                <label className="label">Permissions</label>
+                <label className="label">{t('permissions')}</label>
                 <PermissionPicker
                   grouped={grouped}
                   selected={updateForm.watch('permissionIds') || []}
                   onChange={ids => updateForm.setValue('permissionIds', ids)}
+                  selectAllText={t('selectAll')}
+                  clearAllText={t('clearAll')}
                 />
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Save Changes'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('saveChanges')}
                 </button>
               </div>
             </form>
@@ -266,14 +272,14 @@ export default function RolesPage() {
               <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Trash2 size={24} color="#f87171" />
               </div>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Delete Role?</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>{t('deleteRole')}</h2>
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                Deleting <strong style={{ color: 'var(--text-primary)' }}>{selected.name}</strong> will remove it from all assigned users.
+                {t('deleteRoleConfirm')} (<strong style={{ color: 'var(--text-primary)' }}>{selected.name}</strong>)
               </p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button className="btn-danger" onClick={handleDelete} disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Deleting...</> : 'Delete Role'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('deleteRole')}
                 </button>
               </div>
             </div>
@@ -284,10 +290,12 @@ export default function RolesPage() {
   );
 }
 
-function PermissionPicker({ grouped, selected, onChange }: {
+function PermissionPicker({ grouped, selected, onChange, selectAllText, clearAllText }: {
   grouped: Record<string, Permission[]>;
   selected: string[];
   onChange: (ids: string[]) => void;
+  selectAllText: string;
+  clearAllText: string;
 }) {
   const toggle = (id: string) => {
     if (selected.includes(id)) onChange(selected.filter(s => s !== id));
@@ -314,7 +322,7 @@ function PermissionPicker({ grouped, selected, onChange }: {
             <button type="button" onClick={() => toggleGroup(perms)} style={{
               fontSize: '11px', color: 'var(--primary-light)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '500',
             }}>
-              {perms.every(p => selected.includes(p.id)) ? 'Deselect All' : 'Select All'}
+              {perms.every(p => selected.includes(p.id)) ? clearAllText : selectAllText}
             </button>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '10px 14px' }}>

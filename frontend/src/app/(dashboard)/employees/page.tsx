@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { employeeApi, Employee, CreateEmployeeRequest } from '@/lib/employee-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   Users, Plus, Pencil, Trash2, X, Search, AlertCircle,
   Phone, MapPin, Calendar, RefreshCw, UserCheck, UserX
@@ -17,6 +18,7 @@ function EmployeeModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<CreateEmployeeRequest>({
     name: employee?.name ?? '',
     gender: employee?.gender ?? '',
@@ -61,7 +63,7 @@ function EmployeeModal({
       <div className="modal-content" style={{ maxWidth: 580 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-            {employee ? 'Edit Employee' : 'Add Employee'}
+            {employee ? t('editEmployee') : t('addEmployee')}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
             <X size={20} />
@@ -77,43 +79,43 @@ function EmployeeModal({
         <form onSubmit={submit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Full Name *</label>
+              <label className="label">{t('employeeNameRequired')}</label>
               <input className="input-field" required value={form.name} onChange={e => handle('name', e.target.value)} placeholder="Employee full name" />
             </div>
             <div>
-              <label className="label">Gender</label>
+              <label className="label">{t('gender')}</label>
               <select className="input-field" value={form.gender} onChange={e => handle('gender', e.target.value)}>
-                <option value="">— Select —</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
+                <option value="">{t('selectGender')}</option>
+                <option value="M">{t('male')}</option>
+                <option value="F">{t('female')}</option>
               </select>
             </div>
             <div>
-              <label className="label">Phone</label>
+              <label className="label">{t('phone')}</label>
               <input className="input-field" value={form.phone} onChange={e => handle('phone', e.target.value)} placeholder="+855 xx xxx xxx" />
             </div>
             <div>
-              <label className="label">Start Date</label>
+              <label className="label">{t('colStartDate')}</label>
               <input className="input-field" type="date" value={form.startDate} onChange={e => handle('startDate', e.target.value)} />
             </div>
             <div>
-              <label className="label">Picture URL</label>
+              <label className="label">{t('pictureUrl')}</label>
               <input className="input-field" value={form.pictureUrl} onChange={e => handle('pictureUrl', e.target.value)} placeholder="https://..." />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Address</label>
+              <label className="label">{t('address')}</label>
               <input className="input-field" value={form.address} onChange={e => handle('address', e.target.value)} placeholder="Home address" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label className="label">Description / Notes</label>
+              <label className="label">{t('notes')}</label>
               <textarea className="input-field" rows={3} value={form.description} onChange={e => handle('description', e.target.value)} style={{ resize: 'vertical' }} />
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 24 }}>
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
             <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? 'Saving...' : employee ? 'Save Changes' : 'Create Employee'}
+              {saving ? t('saving') : employee ? t('saveChanges') : t('createEmployee')}
             </button>
           </div>
         </form>
@@ -138,6 +140,7 @@ function Avatar({ name, pictureUrl, gender }: { name: string; pictureUrl?: strin
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function EmployeesPage() {
+  const { t } = useTranslation();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -160,7 +163,7 @@ export default function EmployeesPage() {
   });
 
   const handleDeactivate = async (id: string) => {
-    if (!confirm('Deactivate this employee?')) return;
+    if (!confirm(t('deactivateConfirm'))) return;
     setDeleting(id);
     try { await employeeApi.delete(id); await load(); }
     catch { alert('Operation failed'); }
@@ -185,21 +188,21 @@ export default function EmployeesPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Employees</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Manage your team members and staff</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('employees')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('manageEmployees')}</p>
         </div>
         <button id="create-employee-btn" className="btn-primary" onClick={openCreate}>
-          <Plus size={16} /> Add Employee
+          <Plus size={16} /> {t('addEmployee')}
         </button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         {[
-          { label: 'Total Staff',  value: stats.total,    icon: Users,     color: '#6366f1' },
-          { label: 'Active',       value: stats.active,   icon: UserCheck, color: '#10b981' },
-          { label: 'Inactive',     value: stats.inactive, icon: UserX,     color: '#ef4444' },
-          { label: 'Male / Female',value: `${stats.male} / ${stats.female}`, icon: Users, color: '#f59e0b' },
+          { label: t('totalStaff'),  value: stats.total,    icon: Users,     color: '#6366f1' },
+          { label: t('active'),       value: stats.active,   icon: UserCheck, color: '#10b981' },
+          { label: t('inactive'),     value: stats.inactive, icon: UserX,     color: '#ef4444' },
+          { label: t('maleFemale'),value: `${stats.male} / ${stats.female}`, icon: Users, color: '#f59e0b' },
         ].map(s => (
           <div key={s.label} className="glass-card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -217,34 +220,34 @@ export default function EmployeesPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search by name, phone, address..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchEmployeesPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <button className="btn-secondary" onClick={load} title="Refresh"><RefreshCw size={15} /></button>
+        <button className="btn-secondary" onClick={load} title={t('refresh')}><RefreshCw size={15} /></button>
       </div>
 
       {/* Table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
           <div className="animate-spin" style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
-          Loading employees...
+          {t('loadingEmployees')}
         </div>
       ) : (
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Employee</th>
-                <th>Gender</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Start Date</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{t('colEmployee')}</th>
+                <th>{t('colGender')}</th>
+                <th>{t('phone')}</th>
+                <th>{t('address')}</th>
+                <th>{t('colStartDate')}</th>
+                <th>{t('status')}</th>
+                <th>{t('colActions')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No employees found</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noEmployeesFound')}</td></tr>
               ) : filtered.map(emp => (
                 <tr key={emp.id}>
                   <td>
@@ -254,7 +257,7 @@ export default function EmployeesPage() {
                     </div>
                   </td>
                   <td style={{ fontSize: 12 }}>
-                    {emp.gender === 'M' ? '♂ Male' : emp.gender === 'F' ? '♀ Female' : '—'}
+                    {emp.gender === 'M' ? `♂ ${t('male')}` : emp.gender === 'F' ? `♀ ${t('female')}` : '—'}
                   </td>
                   <td style={{ fontSize: 12 }}>
                     {emp.phone
@@ -273,14 +276,14 @@ export default function EmployeesPage() {
                   </td>
                   <td>
                     {emp.active
-                      ? <span className="badge badge-active">Active</span>
-                      : <span className="badge badge-inactive">Inactive</span>}
+                      ? <span className="badge badge-active">{t('active')}</span>
+                      : <span className="badge badge-inactive">{t('inactive')}</span>}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button id={`edit-employee-${emp.id}`} className="btn-secondary" style={{ padding: '5px 10px' }} onClick={() => openEdit(emp)}><Pencil size={13} /></button>
+                      <button id={`edit-employee-${emp.id}`} className="btn-secondary" style={{ padding: '5px 10px' }} onClick={() => openEdit(emp)} title={t('edit')}><Pencil size={13} /></button>
                       {emp.active && (
-                        <button id={`deactivate-employee-${emp.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: deleting === emp.id ? 0.5 : 1 }} onClick={() => handleDeactivate(emp.id)} disabled={deleting === emp.id} title="Deactivate"><Trash2 size={13} /></button>
+                        <button id={`deactivate-employee-${emp.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: deleting === emp.id ? 0.5 : 1 }} onClick={() => handleDeactivate(emp.id)} disabled={deleting === emp.id} title={t('deactivate')}><Trash2 size={13} /></button>
                       )}
                     </div>
                   </td>

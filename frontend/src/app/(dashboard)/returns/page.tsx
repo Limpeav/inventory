@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { returnApi, SaleReturn, CreateSaleReturnRequest } from '@/lib/return-api';
 import { saleApi, Sale } from '@/lib/sale-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   RotateCcw, Plus, Search, ChevronDown, ChevronUp, AlertCircle,
-  CheckCircle2, X, Receipt, ArrowLeft
+  X
 } from 'lucide-react';
 
 export default function ReturnsPage() {
+  const { t } = useTranslation();
   const [returns, setReturns] = useState<SaleReturn[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -125,10 +127,10 @@ export default function ReturnsPage() {
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <RotateCcw size={24} color="#ec4899" />
-            Sale Returns
+            {t('saleReturns')}
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-            Process customer returns, calculate refunds, and automatically restore inventory stock.
+            {t('returnsSubtitle')}
           </p>
         </div>
 
@@ -143,7 +145,7 @@ export default function ReturnsPage() {
           }}
         >
           <Plus size={16} />
-          Process Return
+          {t('processReturn')}
         </button>
       </div>
 
@@ -153,7 +155,7 @@ export default function ReturnsPage() {
           <Search size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
           <input
             type="text"
-            placeholder="Search returns by reason or sale ID..."
+            placeholder={t('searchReturnsPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
@@ -171,27 +173,27 @@ export default function ReturnsPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-subtle)', textAlign: 'left', color: 'var(--text-muted)' }}>
-                <th style={{ padding: '14px 18px' }}>Return Date</th>
-                <th style={{ padding: '14px 18px' }}>Sale Reference</th>
-                <th style={{ padding: '14px 18px' }}>Reason</th>
-                <th style={{ padding: '14px 18px' }}>Total Refund</th>
-                <th style={{ padding: '14px 18px' }}>Status</th>
-                <th style={{ padding: '14px 18px', textAlign: 'right' }}>Items</th>
+                <th style={{ padding: '14px 18px' }}>{t('colReturnDate')}</th>
+                <th style={{ padding: '14px 18px' }}>{t('colSaleRef')}</th>
+                <th style={{ padding: '14px 18px' }}>{t('colReason')}</th>
+                <th style={{ padding: '14px 18px' }}>{t('colTotalRefund')}</th>
+                <th style={{ padding: '14px 18px' }}>{t('status')}</th>
+                <th style={{ padding: '14px 18px', textAlign: 'right' }}>{t('items')}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    Loading returns...
+                    {t('loadingReturns')}
                   </td>
                 </tr>
               ) : filteredReturns.length === 0 ? (
                 <tr>
                   <td colSpan={6} style={{ padding: '40px', textAlign: 'center' }}>
                     <RotateCcw size={36} color="var(--text-muted)" style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>No returns recorded</p>
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Customer returns will appear here once processed.</p>
+                    <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>{t('noReturnsRecorded')}</p>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{t('noReturnsSubtitle')}</p>
                   </td>
                 </tr>
               ) : (
@@ -216,7 +218,7 @@ export default function ReturnsPage() {
                           {sale?.invoiceCode || r.saleId.slice(0, 8)}
                         </td>
                         <td style={{ padding: '14px 18px', color: 'var(--text-muted)' }}>
-                          {r.reason || 'No reason provided'}
+                          {r.reason || t('noReasonProvided')}
                         </td>
                         <td style={{ padding: '14px 18px', fontWeight: '700', color: '#f87171' }}>
                           {formatCurrency(r.totalRefund)}
@@ -237,7 +239,7 @@ export default function ReturnsPage() {
                               fontSize: '12px',
                             }}
                           >
-                            {r.items?.length || 0} items
+                            {r.items?.length || 0} {t('items')}
                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                           </button>
                         </td>
@@ -249,15 +251,15 @@ export default function ReturnsPage() {
                           <td colSpan={6} style={{ padding: '12px 24px 16px', background: 'var(--bg-subtle)' }}>
                             <div style={{ borderRadius: '8px', border: '1px solid var(--border-subtle)', background: 'var(--bg-base)', padding: '12px' }}>
                               <p style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                Returned Products:
+                                {t('returnedProducts')}:
                               </p>
                               <table style={{ width: '100%', fontSize: '12px' }}>
                                 <thead>
                                   <tr style={{ color: 'var(--text-muted)', textAlign: 'left', borderBottom: '1px solid var(--border-subtle)' }}>
-                                    <th style={{ padding: '6px 8px' }}>Product</th>
-                                    <th style={{ padding: '6px 8px' }}>Quantity Returned</th>
-                                    <th style={{ padding: '6px 8px' }}>Refund Unit Price</th>
-                                    <th style={{ padding: '6px 8px', textAlign: 'right' }}>Total Refund</th>
+                                    <th style={{ padding: '6px 8px' }}>{t('colProduct')}</th>
+                                    <th style={{ padding: '6px 8px' }}>{t('quantityReturned')}</th>
+                                    <th style={{ padding: '6px 8px' }}>{t('refundUnitPrice')}</th>
+                                    <th style={{ padding: '6px 8px', textAlign: 'right' }}>{t('colTotalRefund')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -307,7 +309,7 @@ export default function ReturnsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <RotateCcw size={18} color="#ec4899" />
                 <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                  Process Sale Return
+                  {t('processReturn')}
                 </h2>
               </div>
               <button
@@ -332,7 +334,7 @@ export default function ReturnsPage() {
             <form onSubmit={handleSubmitReturn}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                  Select Sale / Invoice *
+                  {t('selectSaleInvoice')}
                 </label>
                 <select
                   value={selectedSaleId}
@@ -344,10 +346,10 @@ export default function ReturnsPage() {
                     color: 'var(--text-primary)', fontSize: '13px', outline: 'none',
                   }}
                 >
-                  <option value="">-- Choose a sale invoice --</option>
+                  <option value="">{t('chooseSaleInvoice')}</option>
                   {sales.map(s => (
                     <option key={s.id} value={s.id}>
-                      {s.invoiceCode || s.id.slice(0, 8)} • {s.saleDate} • {s.customerName || 'Walk-in'} • {formatCurrency(s.totalAmount)}
+                      {s.invoiceCode || s.id.slice(0, 8)} • {s.saleDate} • {s.customerName || t('walkInCustomer')} • {formatCurrency(s.totalAmount)}
                     </option>
                   ))}
                 </select>
@@ -357,7 +359,7 @@ export default function ReturnsPage() {
               {returnItems.length > 0 && (
                 <div style={{ marginBottom: '16px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    Items to Return & Quantity
+                    {t('itemsToReturnAndQty')}
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {returnItems.map(item => (
@@ -371,10 +373,10 @@ export default function ReturnsPage() {
                       >
                         <div>
                           <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>{item.productName}</p>
-                          <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Sold quantity: {item.maxQty}</p>
+                          <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('soldQuantity')}: {item.maxQty}</p>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Qty to return:</label>
+                          <label style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('qtyToReturn')}</label>
                           <input
                             type="number"
                             min="0"
@@ -396,12 +398,12 @@ export default function ReturnsPage() {
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-                  Return Reason
+                  {t('returnReason')}
                 </label>
                 <textarea
                   value={reason}
                   onChange={e => setReason(e.target.value)}
-                  placeholder="e.g. Defective item, customer changed mind, wrong specification..."
+                  placeholder={t('returnReasonPlaceholder')}
                   rows={3}
                   style={{
                     width: '100%', padding: '10px 12px', borderRadius: '8px',
@@ -421,7 +423,7 @@ export default function ReturnsPage() {
                     color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer',
                   }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -433,7 +435,7 @@ export default function ReturnsPage() {
                     border: 'none', cursor: 'pointer',
                   }}
                 >
-                  {saving ? 'Processing...' : 'Confirm Return'}
+                  {saving ? t('submitting') : t('confirmReturn')}
                 </button>
               </div>
             </form>

@@ -7,6 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Mail, Package, AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
 import { authApi } from '@/lib/auth-api';
+import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { useTranslation } from '@/lib/i18n/translations';
 
 const forgotPasswordSchema = z.object({
   email: z
@@ -18,6 +21,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +71,12 @@ export default function ForgotPasswordPage() {
         padding: '24px',
       }}
     >
+      {/* Top right language and theme controls */}
+      <div style={{ position: 'fixed', top: '20px', right: '24px', zIndex: 50, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
+
       {/* Background decorations */}
       <div
         style={{
@@ -123,11 +133,11 @@ export default function ForgotPasswordPage() {
             <Package size={30} color="white" />
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '6px' }}>
-            <span className="gradient-text">Inventory</span>
-            <span style={{ color: 'var(--text-primary)' }}> System</span>
+            <span className="gradient-text">{t('appName')}</span>
+            <span style={{ color: 'var(--text-primary)' }}> {t('managementSystem')}</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            Password recovery portal
+            {t('forgotPasswordSubtitle')}
           </p>
         </div>
 
@@ -141,7 +151,7 @@ export default function ForgotPasswordPage() {
               color: 'var(--text-primary)',
             }}
           >
-            Reset your password
+            {t('forgotPasswordTitle')}
           </h2>
           <p
             style={{
@@ -151,7 +161,7 @@ export default function ForgotPasswordPage() {
               marginBottom: '24px',
             }}
           >
-            Enter your account email address and we will send you a secure link to reset your password.
+            {t('forgotPasswordSubtitle')}
           </p>
 
           {/* Success Banner */}
@@ -170,13 +180,10 @@ export default function ForgotPasswordPage() {
                 <CheckCircle2 size={18} color="#34d399" style={{ marginTop: '2px', flexShrink: 0 }} />
                 <div>
                   <p style={{ fontSize: '13px', fontWeight: '600', color: '#34d399', marginBottom: '4px' }}>
-                    Email Sent
+                    {t('emailSent')}
                   </p>
                   <p style={{ fontSize: '13px', color: '#a7f3d0', lineHeight: '1.5' }}>
                     {successMessage}
-                  </p>
-                  <p style={{ fontSize: '12px', color: '#6ee7b7', marginTop: '8px' }}>
-                    The reset link will expire in 15 minutes.
                   </p>
                 </div>
               </div>
@@ -207,7 +214,7 @@ export default function ForgotPasswordPage() {
             {/* Email Field */}
             <div style={{ marginBottom: '24px' }}>
               <label className="label" htmlFor="forgot-email-input">
-                Email Address
+                {t('email')}
               </label>
               <div style={{ position: 'relative' }}>
                 <div
@@ -255,10 +262,10 @@ export default function ForgotPasswordPage() {
               {isLoading ? (
                 <>
                   <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                  Sending Reset Link...
+                  {t('sendingResetLink')}
                 </>
               ) : (
-                'Send Reset Link'
+                t('sendResetLink')
               )}
             </button>
           </form>
@@ -281,7 +288,7 @@ export default function ForgotPasswordPage() {
               onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
             >
               <ArrowLeft size={14} />
-              Back to Sign In
+              {t('backToSignIn')}
             </Link>
           </div>
         </div>
@@ -294,7 +301,7 @@ export default function ForgotPasswordPage() {
             color: 'var(--text-muted)',
           }}
         >
-          &copy; 2026 Inventory Management System
+          {t('copyright')}
         </p>
       </div>
     </div>

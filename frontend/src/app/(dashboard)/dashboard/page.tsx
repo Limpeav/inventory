@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth-store';
 import { dashboardApi, DashboardStats } from '@/lib/dashboard-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   Users, Package, TrendingUp, AlertTriangle, ArrowUpRight,
   ShoppingCart, Receipt, RotateCcw, RefreshCw, Warehouse,
@@ -12,6 +13,7 @@ import {
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,10 +53,10 @@ export default function DashboardPage() {
       }}>
         <div>
           <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>
-            Welcome back, <span className="gradient-text">{user?.fullName?.split(' ')[0] || 'Admin'}</span> 👋
+            {t('welcomeBack')}, <span className="gradient-text">{user?.fullName?.split(' ')[0] || 'Admin'}</span> 👋
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            Real-time inventory metrics, transactions, and alert overview.
+            {t('dashboardSubtitle')}
           </p>
         </div>
 
@@ -71,7 +73,7 @@ export default function DashboardPage() {
             }}
           >
             <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
-            {refreshing ? 'Syncing...' : 'Sync'}
+            {refreshing ? t('syncing') : t('sync')}
           </button>
           <Link
             href="/sales"
@@ -84,7 +86,7 @@ export default function DashboardPage() {
             }}
           >
             <Receipt size={16} />
-            New Sale
+            {t('newSale')}
           </Link>
         </div>
       </div>
@@ -107,10 +109,10 @@ export default function DashboardPage() {
             </div>
             <div>
               <p style={{ fontSize: '14px', fontWeight: '700', color: '#f87171' }}>
-                Stock Warning: {stats.lowStockCount} {stats.lowStockCount === 1 ? 'item is' : 'items are'} below reorder level!
+                {t('reorderAlert')}: {stats.lowStockCount} {t('lowStockCount')}!
               </p>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                Items need replenishment to prevent stockouts during upcoming sales.
+                {t('stockSubtitle')}
               </p>
             </div>
           </div>
@@ -121,7 +123,7 @@ export default function DashboardPage() {
               display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
             }}
           >
-            Review Stock <ChevronRight size={15} />
+            {t('viewAll')} <ChevronRight size={15} />
           </Link>
         </div>
       )}
@@ -144,17 +146,17 @@ export default function DashboardPage() {
               fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
               background: 'rgba(99,102,241,0.15)', color: '#818cf8',
             }}>
-              This Month
+              {t('thisMonth')}
             </span>
           </div>
           <p style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {loading ? '...' : formatCurrency(stats?.monthRevenue)}
           </p>
           <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Monthly Revenue
+            {t('monthlyRevenue')}
           </p>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            Today: {loading ? '...' : formatCurrency(stats?.todayRevenue)} ({stats?.todaySaleCount || 0} sales)
+            {t('todaySales')}: {loading ? '...' : formatCurrency(stats?.todayRevenue)} ({stats?.todaySaleCount || 0} {t('navSales')})
           </p>
         </div>
 
@@ -171,17 +173,17 @@ export default function DashboardPage() {
               fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
               background: 'rgba(245,158,11,0.15)', color: '#fbbf24',
             }}>
-              Purchases
+              {t('navPurchases')}
             </span>
           </div>
           <p style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {loading ? '...' : formatCurrency(stats?.monthSpend)}
           </p>
           <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Procurement Spend
+            {t('procurementSpend')}
           </p>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {stats?.monthPurchaseCount || 0} purchase orders this month
+            {stats?.monthPurchaseCount || 0} {t('procurementOrders')}
           </p>
         </div>
 
@@ -198,17 +200,17 @@ export default function DashboardPage() {
               fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
               background: 'rgba(16,185,129,0.15)', color: '#34d399',
             }}>
-              Catalog
+              {t('navProducts')}
             </span>
           </div>
           <p style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {loading ? '...' : (stats?.totalProducts ?? 0)}
           </p>
           <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Total Products
+            {t('totalProducts')}
           </p>
           <p style={{ fontSize: '12px', color: stats?.lowStockCount ? '#f87171' : 'var(--text-muted)' }}>
-            {stats?.lowStockCount ? `⚠️ ${stats.lowStockCount} below reorder level` : 'All items sufficiently stocked'}
+            {stats?.lowStockCount ? `⚠️ ${stats.lowStockCount} ${t('lowStockCount')}` : t('allStockSufficient')}
           </p>
         </div>
 
@@ -225,17 +227,17 @@ export default function DashboardPage() {
               fontSize: '11px', fontWeight: '600', padding: '3px 8px', borderRadius: '20px',
               background: 'rgba(139,92,246,0.15)', color: '#a78bfa',
             }}>
-              Partners
+              {t('customersSuppliers')}
             </span>
           </div>
           <p style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {loading ? '...' : `${stats?.totalCustomers || 0} / ${stats?.totalSuppliers || 0}`}
           </p>
           <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Customers / Suppliers
+            {t('customersSuppliers')}
           </p>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            {stats?.totalEmployees || 0} active employees
+            {stats?.totalEmployees || 0} {t('activeEmployeesCount')}
           </p>
         </div>
       </div>
@@ -250,34 +252,34 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Warehouse size={18} color="#f59e0b" />
                 <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                  Low Stock Watchlist
+                  {t('lowStockWatchlist')}
                 </h2>
               </div>
               <Link href="/stock" style={{ fontSize: '12px', color: 'var(--primary-light)', textDecoration: 'none', fontWeight: '600' }}>
-                View All
+                {t('viewAll')}
               </Link>
             </div>
 
             {loading ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>Loading items...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>{t('loading')}</p>
             ) : !stats?.lowStockAlerts || stats.lowStockAlerts.length === 0 ? (
               <div style={{
                 textAlign: 'center', padding: '32px 16px',
                 background: 'var(--bg-subtle)', borderRadius: '10px',
               }}>
                 <CheckCircle2 size={32} color="#10b981" style={{ margin: '0 auto 8px' }} />
-                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>All Stock Levels Healthy</p>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>No products currently need urgent restocking.</p>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>{t('allStockHealthy')}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{t('noProductsNeedRestock')}</p>
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-subtle)', textAlign: 'left', color: 'var(--text-muted)' }}>
-                      <th style={{ padding: '8px 12px 12px' }}>Product</th>
-                      <th style={{ padding: '8px 12px 12px' }}>Current Stock</th>
-                      <th style={{ padding: '8px 12px 12px' }}>Reorder Level</th>
-                      <th style={{ padding: '8px 12px 12px', textAlign: 'right' }}>Action</th>
+                      <th style={{ padding: '8px 12px 12px' }}>{t('colProduct')}</th>
+                      <th style={{ padding: '8px 12px 12px' }}>{t('currentStock')}</th>
+                      <th style={{ padding: '8px 12px 12px' }}>{t('colReorder')}</th>
+                      <th style={{ padding: '8px 12px 12px', textAlign: 'right' }}>{t('colActions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -291,11 +293,11 @@ export default function DashboardPage() {
                             padding: '3px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '700',
                             background: 'rgba(239,68,68,0.15)', color: '#f87171',
                           }}>
-                            {alert.quantity} units
+                            {alert.quantity}
                           </span>
                         </td>
                         <td style={{ padding: '12px', color: 'var(--text-secondary)' }}>
-                          {alert.reorderLevel} units
+                          {alert.reorderLevel}
                         </td>
                         <td style={{ padding: '12px', textAlign: 'right' }}>
                           <Link
@@ -305,7 +307,7 @@ export default function DashboardPage() {
                               display: 'inline-flex', alignItems: 'center', gap: '3px', textDecoration: 'none',
                             }}
                           >
-                            Order <ArrowUpRight size={13} />
+                            {t('newPurchase')} <ArrowUpRight size={13} />
                           </Link>
                         </td>
                       </tr>
@@ -322,18 +324,18 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <TrendingUp size={18} color="#10b981" />
                 <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                  Top Selling Products
+                  {t('topSellingProducts')}
                 </h2>
               </div>
               <Link href="/products" style={{ fontSize: '12px', color: 'var(--primary-light)', textDecoration: 'none', fontWeight: '600' }}>
-                Product Catalog
+                {t('productCatalog')}
               </Link>
             </div>
 
             {loading ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>Loading products...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>{t('loading')}</p>
             ) : !stats?.topProducts || stats.topProducts.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>No sales data available yet.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>{t('noSalesData')}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {stats.topProducts.map((p, idx) => (
@@ -359,7 +361,7 @@ export default function DashboardPage() {
                           {p.productName}
                         </p>
                         <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                          {p.totalSold} units sold
+                          {p.totalSold} {t('quantity')}
                         </p>
                       </div>
                     </div>
@@ -378,7 +380,7 @@ export default function DashboardPage() {
           {/* Quick Shortcuts */}
           <div className="glass-card" style={{ padding: '20px 24px' }}>
             <h2 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Quick Actions
+              {t('quickActions')}
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <Link
@@ -391,7 +393,7 @@ export default function DashboardPage() {
                 }}
               >
                 <Receipt size={16} color="#6366f1" />
-                Sales Order
+                {t('salesOrder')}
               </Link>
               <Link
                 href="/purchases"
@@ -403,7 +405,7 @@ export default function DashboardPage() {
                 }}
               >
                 <ShoppingCart size={16} color="#f59e0b" />
-                Purchase Order
+                {t('purchaseOrder')}
               </Link>
               <Link
                 href="/stock"
@@ -415,7 +417,7 @@ export default function DashboardPage() {
                 }}
               >
                 <Warehouse size={16} color="#10b981" />
-                Adjust Stock
+                {t('adjustStock')}
               </Link>
               <Link
                 href="/returns"
@@ -427,7 +429,7 @@ export default function DashboardPage() {
                 }}
               >
                 <RotateCcw size={16} color="#ec4899" />
-                Sale Return
+                {t('saleReturn')}
               </Link>
             </div>
           </div>
@@ -438,18 +440,18 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Activity size={18} color="var(--primary-light)" />
                 <h2 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                  Recent Sales
+                  {t('recentSales')}
                 </h2>
               </div>
               <Link href="/sales" style={{ fontSize: '12px', color: 'var(--primary-light)', textDecoration: 'none', fontWeight: '600' }}>
-                View All
+                {t('viewAll')}
               </Link>
             </div>
 
             {loading ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>Loading activity...</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>{t('loading')}</p>
             ) : !stats?.recentSales || stats.recentSales.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>No recent sales recorded.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', padding: '16px 0' }}>{t('noRecentSales')}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {stats.recentSales.map((sale, i) => (
@@ -473,11 +475,11 @@ export default function DashboardPage() {
                           color: sale.status === 'COMPLETED' ? '#34d399' :
                                  sale.status === 'CANCELLED' ? '#f87171' : '#fbbf24',
                         }}>
-                          {sale.status}
+                          {sale.status === 'COMPLETED' ? t('active') : sale.status}
                         </span>
                       </div>
                       <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                        {sale.customerName ? `Customer: ${sale.customerName}` : 'Walk-in Customer'} • {sale.saleDate}
+                        {sale.customerName ? `${t('colCustomer', 'Customer')}: ${sale.customerName}` : 'Walk-in Customer'} • {sale.saleDate}
                       </p>
                     </div>
                     <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>

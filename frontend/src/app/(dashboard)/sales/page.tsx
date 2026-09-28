@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { saleApi, Sale, CreateSaleRequest } from '@/lib/sale-api';
+import { saleApi, Sale } from '@/lib/sale-api';
 import { customerApi, Customer } from '@/lib/customer-api';
 import { productApi, Product } from '@/lib/product-api';
+import { useTranslation } from '@/lib/i18n/translations';
 import {
   Receipt, Plus, X, AlertCircle, Search, RefreshCw,
   Trash2, DollarSign, Ban, CheckCircle2, ClipboardList
@@ -21,6 +22,7 @@ function CreateSaleModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation();
   const [saleDate, setSaleDate] = useState(new Date().toISOString().slice(0, 10));
   const [customerId, setCustomerId] = useState('');
   const [invoiceCode, setInvoiceCode] = useState('');
@@ -71,42 +73,42 @@ function CreateSaleModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" style={{ maxWidth: 760, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>New Sale Invoice</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>{t('newSaleInvoice')}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={20} /></button>
         </div>
         {error && <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, marginBottom: 16, color: '#f87171', fontSize: 13 }}><AlertCircle size={15} />{error}</div>}
         <form onSubmit={submit}>
           {/* Header fields */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
-            <div><label className="label">Invoice #</label><input className="input-field" value={invoiceCode} onChange={e => setInvoiceCode(e.target.value)} placeholder="Auto-generated if blank" /></div>
-            <div><label className="label">Date *</label><input className="input-field" type="date" required value={saleDate} onChange={e => setSaleDate(e.target.value)} /></div>
-            <div><label className="label">Customer</label>
+            <div><label className="label">{t('invoiceNumber')}</label><input className="input-field" value={invoiceCode} onChange={e => setInvoiceCode(e.target.value)} placeholder="Auto-generated if blank" /></div>
+            <div><label className="label">{t('date')} *</label><input className="input-field" type="date" required value={saleDate} onChange={e => setSaleDate(e.target.value)} /></div>
+            <div><label className="label">{t('selectCustomer')}</label>
               <select className="input-field" value={customerId} onChange={e => setCustomerId(e.target.value)}>
-                <option value="">— Walk-in / No Customer —</option>
+                <option value="">{t('walkInOption')}</option>
                 {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <div><label className="label">Currency</label>
+            <div><label className="label">{t('currency')}</label>
               <select className="input-field" value={currency} onChange={e => setCurrency(e.target.value)}>
                 <option value="USD">USD ($)</option>
-                <option value="KHR">KHR (฿)</option>
+                <option value="KHR">KHR (៛)</option>
               </select>
             </div>
-            <div><label className="label">Overall Discount</label><input className="input-field" type="number" step="0.01" min="0" value={discount} onChange={e => setDiscount(e.target.value)} /></div>
-            <div><label className="label">Note</label><input className="input-field" value={note} onChange={e => setNote(e.target.value)} /></div>
+            <div><label className="label">{t('overallDiscount')}</label><input className="input-field" type="number" step="0.01" min="0" value={discount} onChange={e => setDiscount(e.target.value)} /></div>
+            <div><label className="label">{t('note')}</label><input className="input-field" value={note} onChange={e => setNote(e.target.value)} /></div>
           </div>
 
           {/* Line items */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>Line Items</span>
-              <button type="button" className="btn-secondary" style={{ padding: '5px 12px', fontSize: 12 }} onClick={addLine}><Plus size={13} /> Add Line</button>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{t('lineItems')}</span>
+              <button type="button" className="btn-secondary" style={{ padding: '5px 12px', fontSize: 12 }} onClick={addLine}><Plus size={13} /> {t('addLine')}</button>
             </div>
             <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead><tr style={{ background: 'var(--bg-card)' }}>
-                  {['Product', 'Qty', 'Unit Price', 'Discount', 'Subtotal', ''].map(h => (
-                    <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
+                  {[t('colProduct'), t('quantity'), t('unitPrice'), t('discount'), t('subtotal'), ''].map((h, idx) => (
+                    <th key={idx} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
                   ))}
                 </tr></thead>
                 <tbody>
@@ -116,7 +118,7 @@ function CreateSaleModal({
                       <tr key={i} style={{ borderTop: '1px solid var(--border)' }}>
                         <td style={{ padding: '8px 12px' }}>
                           <select className="input-field" style={{ padding: '5px 8px', fontSize: 12 }} value={line.productId} onChange={e => onProductChange(i, e.target.value)} required>
-                            <option value="">— Select —</option>
+                            <option value="">{t('selectProduct')}</option>
                             {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                           </select>
                         </td>
@@ -139,20 +141,20 @@ function CreateSaleModal({
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
             <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 20px', minWidth: 220 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-                <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
+                <span>{t('subtotal')}</span><span>${subtotal.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6 }}>
-                <span>Discount</span><span>-${parseFloat(discount || '0').toFixed(2)}</span>
+                <span>{t('discount')}</span><span>-${parseFloat(discount || '0').toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, color: '#10b981', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
-                <span>Total</span><span>${total.toFixed(2)}</span>
+                <span>{t('total')}</span><span>${total.toFixed(2)}</span>
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Create Sale'}</button>
+            <button type="button" className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
+            <button type="submit" className="btn-primary" disabled={saving}>{saving ? t('saving') : t('createSale')}</button>
           </div>
         </form>
       </div>
@@ -162,22 +164,24 @@ function CreateSaleModal({
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { color: string; bg: string; border: string; icon: React.ReactNode }> = {
-    COMPLETED: { color: '#10b981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)', icon: <CheckCircle2 size={11} /> },
-    PENDING:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.3)',  icon: <ClipboardList size={11} /> },
-    CANCELLED: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   icon: <Ban size={11} /> },
-    RETURNED:  { color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',  border: 'rgba(139,92,246,0.3)',  icon: <X size={11} /> },
+  const { t } = useTranslation();
+  const map: Record<string, { color: string; bg: string; border: string; label: string; icon: React.ReactNode }> = {
+    COMPLETED: { color: '#10b981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)', label: t('completed'), icon: <CheckCircle2 size={11} /> },
+    PENDING:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.3)',  label: t('pending'),   icon: <ClipboardList size={11} /> },
+    CANCELLED: { color: '#ef4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)',   label: t('cancelled'), icon: <Ban size={11} /> },
+    RETURNED:  { color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',  border: 'rgba(139,92,246,0.3)',  label: t('returned'),  icon: <X size={11} /> },
   };
   const s = map[status] ?? map.PENDING;
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: s.bg, border: `1px solid ${s.border}`, color: s.color }}>
-      {s.icon}{status}
+      {s.icon}{s.label}
     </span>
   );
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function SalesPage() {
+  const { t } = useTranslation();
   const [sales, setSales] = useState<Sale[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -206,7 +210,7 @@ export default function SalesPage() {
   });
 
   const handleCancel = async (id: string) => {
-    if (!confirm('Cancel this sale? Stock will be restored.')) return;
+    if (!confirm(t('cancelSaleConfirm'))) return;
     setCancelling(id);
     try { await saleApi.cancel(id); await load(); }
     catch (err: unknown) {
@@ -225,18 +229,18 @@ export default function SalesPage() {
     <div className="animate-fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Sales</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>Record and track sales transactions</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('sales')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('salesSubtitle')}</p>
         </div>
-        <button id="create-sale-btn" className="btn-primary" onClick={() => setModalOpen(true)}><Plus size={16} /> New Sale</button>
+        <button id="create-sale-btn" className="btn-primary" onClick={() => setModalOpen(true)}><Plus size={16} /> {t('newSale')}</button>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {[
-          { label: 'Total Sales',   value: stats.total,     icon: Receipt,      color: '#6366f1' },
-          { label: 'Completed',     value: stats.completed, icon: CheckCircle2, color: '#10b981' },
-          { label: 'Total Revenue', value: `$${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, color: '#f59e0b' },
+          { label: t('totalSales'),   value: stats.total,     icon: Receipt,      color: '#6366f1' },
+          { label: t('completed'),     value: stats.completed, icon: CheckCircle2, color: '#10b981' },
+          { label: t('totalRevenue'), value: `$${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, color: '#f59e0b' },
         ].map(s => (
           <div key={s.label} className="glass-card" style={{ padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${s.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><s.icon size={20} color={s.color} /></div>
@@ -252,52 +256,52 @@ export default function SalesPage() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search by invoice # or customer..." value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchSalesPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <select className="input-field" style={{ width: 160 }} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
-          <option value="">All Status</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="PENDING">Pending</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="RETURNED">Returned</option>
+          <option value="">{t('allStatus')}</option>
+          <option value="COMPLETED">{t('completed')}</option>
+          <option value="PENDING">{t('pending')}</option>
+          <option value="CANCELLED">{t('cancelled')}</option>
+          <option value="RETURNED">{t('returned')}</option>
         </select>
-        <button className="btn-secondary" onClick={load}><RefreshCw size={15} /></button>
+        <button className="btn-secondary" onClick={load} title={t('refresh')}><RefreshCw size={15} /></button>
       </div>
 
       {/* Table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>
           <div className="animate-spin" style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--primary)', borderRadius: '50%', margin: '0 auto 12px' }} />
-          Loading sales...
+          {t('loadingSales')}
         </div>
       ) : (
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Invoice #</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Items</th>
-                <th>Total</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{t('colInvoice')}</th>
+                <th>{t('colDate')}</th>
+                <th>{t('colCustomer')}</th>
+                <th>{t('colItems')}</th>
+                <th>{t('colTotal')}</th>
+                <th>{t('colStatus')}</th>
+                <th>{t('colActions')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No sales found</td></tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noSalesFound')}</td></tr>
               ) : filtered.map(s => (
                 <tr key={s.id}>
                   <td style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{s.invoiceCode ?? s.id.slice(0, 8)}</td>
                   <td style={{ fontSize: 12 }}>{new Date(s.saleDate).toLocaleDateString()}</td>
-                  <td style={{ fontSize: 13 }}>{s.customerName ?? <span style={{ color: 'var(--text-muted)' }}>Walk-in</span>}</td>
-                  <td style={{ fontSize: 12 }}>{s.items?.length ?? 0} items</td>
+                  <td style={{ fontSize: 13 }}>{s.customerName ?? <span style={{ color: 'var(--text-muted)' }}>{t('walkInCustomer')}</span>}</td>
+                  <td style={{ fontSize: 12 }}>{s.items?.length ?? 0} {t('items')}</td>
                   <td style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>${(s.totalAmount ?? 0).toFixed(2)} <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.currency}</span></td>
                   <td><StatusBadge status={s.status} /></td>
                   <td>
                     {s.status !== 'CANCELLED' && (
-                      <button id={`cancel-sale-${s.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: cancelling === s.id ? 0.5 : 1 }} onClick={() => handleCancel(s.id)} disabled={cancelling === s.id} title="Cancel Sale">
+                      <button id={`cancel-sale-${s.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: cancelling === s.id ? 0.5 : 1 }} onClick={() => handleCancel(s.id)} disabled={cancelling === s.id} title={t('cancelSale')}>
                         <Ban size={13} />
                       </button>
                     )}

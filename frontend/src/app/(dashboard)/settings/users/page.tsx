@@ -8,6 +8,7 @@ import { Plus, Search, Pencil, Trash2, X, Loader2, Users as UsersIcon, RefreshCw
 import { userApi } from '@/lib/user-api';
 import { roleApi } from '@/lib/role-api';
 import { useAuthStore } from '@/store/auth-store';
+import { useTranslation } from '@/lib/i18n/translations';
 import type { User, Role } from '@/types';
 
 const isUserAdmin = (u: User) =>
@@ -33,6 +34,7 @@ type UpdateForm = z.infer<typeof updateSchema>;
 
 export default function UsersPage() {
   const { hasRole } = useAuthStore();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -100,7 +102,7 @@ export default function UsersPage() {
   };
 
   const handleUpdate = async (data: UpdateForm) => {
-    if (!selected || isUserAdmin(selected)) return;
+    if (!selected) return;
     setSaving(true); setError('');
     try {
       await userApi.update(selected.id, data);
@@ -113,35 +115,38 @@ export default function UsersPage() {
   };
 
   const handleDelete = async () => {
-    if (!selected || isUserAdmin(selected)) return;
+    if (!selected) return;
     setSaving(true);
     try {
       await userApi.delete(selected.id);
       setModal(null);
       load();
-    } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      setError(err?.response?.data?.message || 'Failed to delete user');
-    } finally { setSaving(false); }
+    } catch {
+      // error handled by api toast or state
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in" style={{ maxWidth: '1200px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)' }}>User Management</h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Manage system users and their access roles
+          <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+            {t('userManagement')}
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+            {t('usersSubtitle')}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn-secondary" onClick={load} id="refresh-users">
-            <RefreshCw size={14} /> Refresh
+          <button className="btn-secondary" onClick={load} title={t('refresh')}>
+            <RefreshCw size={15} />
           </button>
           {isAdmin && (
-            <button className="btn-primary" onClick={() => { setModal('create'); setError(''); createForm.reset({ roleIds: [] }); }} id="create-user-btn">
-              <Plus size={16} /> Add User
+            <button className="btn-primary" onClick={() => { setError(''); createForm.reset(); setModal('create'); }}>
+              <Plus size={16} /> {t('addUser')}
             </button>
           )}
         </div>
@@ -153,7 +158,7 @@ export default function UsersPage() {
           <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Search users by name, username or email..."
+            placeholder={t('searchUsersPlaceholder')}
             className="input-field"
             style={{ paddingLeft: '36px' }}
             value={search}
@@ -163,15 +168,15 @@ export default function UsersPage() {
         <div style={{ display: 'flex', gap: '16px', flexShrink: 0 }}>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)' }}>{users.length}</p>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total</p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('total')}</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '20px', fontWeight: '700', color: '#34d399' }}>{users.filter(u => u.active).length}</p>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Active</p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('active')}</p>
           </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontSize: '20px', fontWeight: '700', color: '#f87171' }}>{users.filter(u => !u.active).length}</p>
-            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Inactive</p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('inactive')}</p>
           </div>
         </div>
       </div>
@@ -181,7 +186,7 @@ export default function UsersPage() {
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px', gap: '12px', color: 'var(--text-muted)' }}>
             <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} />
-            Loading users...
+            {t('loadingUsers')}
           </div>
         ) : (
           <div className="table-container">
@@ -189,12 +194,12 @@ export default function UsersPage() {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>User</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
+                  <th>{t('fullName')}</th>
+                  <th>{t('username')}</th>
+                  <th>{t('role')}</th>
+                  <th>{t('status')}</th>
+                  <th>{t('created')}</th>
+                  <th>{t('colActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -202,7 +207,7 @@ export default function UsersPage() {
                   <tr>
                     <td colSpan={7} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px' }}>
                       <UsersIcon size={32} style={{ margin: '0 auto 10px', opacity: 0.3, display: 'block' }} />
-                      No users found
+                      {t('noUsersFound')}
                     </td>
                   </tr>
                 ) : (
@@ -237,7 +242,7 @@ export default function UsersPage() {
                       </td>
                       <td>
                         <span className={`badge ${user.active ? 'badge-active' : 'badge-inactive'}`}>
-                          {user.active ? '● Active' : '○ Inactive'}
+                          {user.active ? `● ${t('active')}` : `○ ${t('inactive')}`}
                         </span>
                       </td>
                       <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -258,14 +263,14 @@ export default function UsersPage() {
                               alignItems: 'center',
                               gap: '4px',
                             }}>
-                              <Lock size={11} /> Protected
+                              <Lock size={11} /> {t('protected')}
                             </span>
                           ) : (
                             <div style={{ display: 'flex', gap: '6px' }}>
-                              <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }}>
+                              <button className="btn-secondary" onClick={() => openEdit(user)} style={{ padding: '6px 10px' }} title={t('edit')}>
                                 <Pencil size={13} />
                               </button>
-                              <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }}>
+                              <button className="btn-danger" onClick={() => { setSelected(user); setModal('delete'); }} style={{ padding: '6px 10px' }} title={t('delete')}>
                                 <Trash2 size={13} />
                               </button>
                             </div>
@@ -288,48 +293,48 @@ export default function UsersPage() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Add New User</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{t('addUser')}</h2>
               <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={20} />
               </button>
             </div>
             {error && <div style={{ padding: '10px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
             <form onSubmit={createForm.handleSubmit(handleCreate)} autoComplete="off">
-              <FormField label="Full Name" error={createForm.formState.errors.fullName?.message}>
+              <FormField label={t('fullName')} error={createForm.formState.errors.fullName?.message}>
                 <input className="input-field" placeholder="John Doe" {...createForm.register('fullName')} />
               </FormField>
-              <FormField label="Username" error={createForm.formState.errors.username?.message}>
+              <FormField label={t('username')} error={createForm.formState.errors.username?.message}>
                 <input className="input-field" placeholder="johndoe" autoComplete="off" {...createForm.register('username')} />
               </FormField>
-              <FormField label="Email" error={createForm.formState.errors.email?.message}>
+              <FormField label={t('email')} error={createForm.formState.errors.email?.message}>
                 <input type="email" className="input-field" placeholder="john@example.com" {...createForm.register('email')} />
               </FormField>
-              <FormField label="Password" error={createForm.formState.errors.password?.message}>
+              <FormField label={t('password')} error={createForm.formState.errors.password?.message}>
                 <input type="password" className="input-field" placeholder="Min 8 characters" autoComplete="new-password" {...createForm.register('password')} />
               </FormField>
-              <FormField label="Role" error={createForm.formState.errors.roleIds?.message}>
+              <FormField label={t('role')} error={createForm.formState.errors.roleIds?.message}>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {roles.map(role => {
-                    const selected = createForm.watch('roleIds')?.[0] === role.id;
+                    const selectedRole = createForm.watch('roleIds')?.[0] === role.id;
                     return (
                       <label key={role.id} style={{
                         display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
                         padding: '8px 14px', borderRadius: '8px',
-                        background: selected ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${selected ? 'rgba(99,102,241,0.4)' : 'var(--border-subtle)'}`,
+                        background: selectedRole ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${selectedRole ? 'rgba(99,102,241,0.4)' : 'var(--border-subtle)'}`,
                         transition: 'all 0.15s ease',
                       }}>
                         <input
                           type="radio"
                           name="createRole"
                           value={role.id}
-                          checked={selected}
+                          checked={selectedRole}
                           onChange={() => {
                             createForm.setValue('roleIds', [role.id], { shouldValidate: true });
                           }}
                           style={{ display: 'none' }}
                         />
-                        <span style={{ fontSize: '13px', fontWeight: '500', color: selected ? 'var(--primary-light)' : 'var(--text-secondary)' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '500', color: selectedRole ? 'var(--primary-light)' : 'var(--text-secondary)' }}>
                           {role.name}
                         </span>
                       </label>
@@ -338,9 +343,9 @@ export default function UsersPage() {
                 </div>
               </FormField>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Create User'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('createUser')}
                 </button>
               </div>
             </form>
@@ -353,26 +358,26 @@ export default function UsersPage() {
         <div className="modal-overlay" onClick={() => setModal(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Edit User</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700' }}>{t('editUser')}</h2>
               <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={20} />
               </button>
             </div>
             {error && <div style={{ padding: '10px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
             <form onSubmit={updateForm.handleSubmit(handleUpdate)}>
-              <FormField label="Full Name" error={updateForm.formState.errors.fullName?.message}>
+              <FormField label={t('fullName')} error={updateForm.formState.errors.fullName?.message}>
                 <input className="input-field" {...updateForm.register('fullName')} />
               </FormField>
-              <FormField label="Email" error={updateForm.formState.errors.email?.message}>
+              <FormField label={t('email')} error={updateForm.formState.errors.email?.message}>
                 <input type="email" className="input-field" {...updateForm.register('email')} />
               </FormField>
-              <FormField label="Status">
+              <FormField label={t('status')}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                   <input type="checkbox" {...updateForm.register('active')} />
-                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Active</span>
+                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{t('active')}</span>
                 </label>
               </FormField>
-              <FormField label="Role" error={updateForm.formState.errors.roleIds?.message}>
+              <FormField label={t('role')} error={updateForm.formState.errors.roleIds?.message}>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {roles.map(role => {
                     const isSelected = updateForm.watch('roleIds')?.[0] === role.id;
@@ -403,9 +408,9 @@ export default function UsersPage() {
                 </div>
               </FormField>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button type="button" className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Saving...</> : 'Save Changes'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('saveChanges')}
                 </button>
               </div>
             </form>
@@ -425,15 +430,14 @@ export default function UsersPage() {
               }}>
                 <Trash2 size={24} color="#f87171" />
               </div>
-              <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Delete User?</h2>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>{t('deleteUser')}</h2>
               <p style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '24px' }}>
-                Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>{selected.fullName}</strong>?
-                This action cannot be undone.
+                {t('deleteConfirm')} (<strong style={{ color: 'var(--text-primary)' }}>{selected.fullName}</strong>)
               </p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
+                <button className="btn-secondary" onClick={() => setModal(null)}>{t('cancel')}</button>
                 <button className="btn-danger" onClick={handleDelete} disabled={saving}>
-                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Deleting...</> : 'Delete User'}
+                  {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('deleteUser')}
                 </button>
               </div>
             </div>

@@ -21,6 +21,9 @@ import {
   Wand2,
 } from 'lucide-react';
 import { authApi } from '@/lib/auth-api';
+import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { useTranslation } from '@/lib/i18n/translations';
 
 const resetPasswordSchema = z
   .object({
@@ -42,6 +45,7 @@ const resetPasswordSchema = z
 type ResetPasswordForm = z.infer<typeof resetPasswordSchema>;
 
 function ResetPasswordContent() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
 
@@ -145,6 +149,11 @@ function ResetPasswordContent() {
         padding: '24px',
       }}
     >
+      {/* Top right language and theme controls */}
+      <div style={{ position: 'fixed', top: '20px', right: '24px', zIndex: 50, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       {/* Background decorations */}
       <div
         style={{
@@ -201,11 +210,11 @@ function ResetPasswordContent() {
             <Package size={30} color="white" />
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '6px' }}>
-            <span className="gradient-text">Inventory</span>
-            <span style={{ color: 'var(--text-primary)' }}> System</span>
+            <span className="gradient-text">{t('appName')}</span>
+            <span style={{ color: 'var(--text-primary)' }}> {t('managementSystem')}</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            Set a new secure password
+            {t('resetPasswordSubtitle')}
           </p>
         </div>
 
@@ -578,10 +587,10 @@ function ResetPasswordContent() {
                   {isLoading ? (
                     <>
                       <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                      Updating Password...
+                      {t('updatingPassword')}
                     </>
                   ) : (
-                    'Reset Password'
+                    t('resetPasswordButton')
                   )}
                 </button>
               </form>
@@ -603,7 +612,7 @@ function ResetPasswordContent() {
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                 >
                   <ArrowLeft size={14} />
-                  Back to Sign In
+                  {t('backToSignIn')}
                 </Link>
               </div>
             </div>
@@ -618,7 +627,7 @@ function ResetPasswordContent() {
             color: 'var(--text-muted)',
           }}
         >
-          &copy; 2026 Inventory Management System
+          {t('copyright')}
         </p>
       </div>
     </div>
