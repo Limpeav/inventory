@@ -225,29 +225,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Bell size={16} />
             </button>
 
-            {/* Top Bar Logout Button */}
-            <button
-              id="top-logout-btn"
-              onClick={handleLogout}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: '7px 12px', borderRadius: '10px',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
-                background: 'rgba(239, 68, 68, 0.08)',
-                color: '#f87171', fontSize: '13px', fontWeight: '600',
-                cursor: 'pointer', transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.2)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.08)';
-              }}
-              title="Sign out of your account"
-            >
-              <LogOut size={15} />
-              <span>Logout</span>
-            </button>
 
             {/* Profile Dropdown */}
             <div style={{ position: 'relative' }}>
