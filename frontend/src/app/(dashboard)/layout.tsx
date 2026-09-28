@@ -12,26 +12,38 @@ import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
 import Cookies from 'js-cookie';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { LanguageToggle } from '@/components/language-toggle';
+import { useTranslation, TranslationKey } from '@/lib/i18n/translations';
 
-const navItems = [
-  { href: '/dashboard',            label: 'Dashboard',   icon: LayoutDashboard, section: 'main' },
-  { href: '/products',             label: 'Products',    icon: Package,         section: 'inventory' },
-  { href: '/stock',                label: 'Stock',       icon: Warehouse,       section: 'inventory' },
-  { href: '/customers',            label: 'Customers',   icon: UserCheck,       section: 'inventory' },
-  { href: '/suppliers',            label: 'Suppliers',   icon: Truck,           section: 'inventory' },
-  { href: '/employees',            label: 'Employees',   icon: Users,           section: 'inventory', roles: ['ADMIN', 'MANAGER'] },
-  { href: '/sales',                label: 'Sales',       icon: Receipt,         section: 'transactions' },
-  { href: '/purchases',            label: 'Purchases',   icon: ShoppingCart,    section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
-  { href: '/returns',              label: 'Returns',     icon: RotateCcw,       section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
-  { href: '/payments',             label: 'Payments',    icon: CreditCard,      section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
-  { href: '/settings/users',       label: 'Users',       icon: Shield,          section: 'settings',  roles: ['ADMIN', 'MANAGER'] },
-  { href: '/settings/roles',       label: 'Roles & Access', icon: Settings,     section: 'settings',  roles: ['ADMIN'] },
+interface NavItemDef {
+  href: string;
+  translationKey: TranslationKey;
+  label: string;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
+  section: 'main' | 'inventory' | 'transactions' | 'settings';
+  roles?: string[];
+}
+
+const navItemDefs: NavItemDef[] = [
+  { href: '/dashboard',            translationKey: 'navDashboard', label: 'Dashboard',   icon: LayoutDashboard, section: 'main' },
+  { href: '/products',             translationKey: 'navProducts', label: 'Products',    icon: Package,         section: 'inventory' },
+  { href: '/stock',                translationKey: 'navStock', label: 'Stock',       icon: Warehouse,       section: 'inventory' },
+  { href: '/customers',            translationKey: 'navCustomers', label: 'Customers',   icon: UserCheck,       section: 'inventory' },
+  { href: '/suppliers',            translationKey: 'navSuppliers', label: 'Suppliers',   icon: Truck,           section: 'inventory' },
+  { href: '/employees',            translationKey: 'navEmployees', label: 'Employees',   icon: Users,           section: 'inventory', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/sales',                translationKey: 'navSales', label: 'Sales',       icon: Receipt,         section: 'transactions' },
+  { href: '/purchases',            translationKey: 'navPurchases', label: 'Purchases',   icon: ShoppingCart,    section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/returns',              translationKey: 'navReturns', label: 'Returns',     icon: RotateCcw,       section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/payments',             translationKey: 'navPayments', label: 'Payments',    icon: CreditCard,      section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/settings/users',       translationKey: 'navUsers', label: 'Users',       icon: Shield,          section: 'settings',  roles: ['ADMIN', 'MANAGER'] },
+  { href: '/settings/roles',       translationKey: 'navRoles', label: 'Roles & Access', icon: Settings,     section: 'settings',  roles: ['ADMIN'] },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, clearAuth, hasRole } = useAuthStore();
+  const { t, language } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -54,16 +66,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.replace('/login');
   };
 
-  const canAccess = (item: typeof navItems[0]) => {
+  const canAccess = (item: NavItemDef) => {
     if (!item.roles) return true;
     if (!mounted) return true;
     return item.roles.some(r => hasRole(r));
   };
 
-  const mainItems = navItems.filter(i => i.section === 'main' && canAccess(i));
-  const inventoryItems = navItems.filter(i => i.section === 'inventory' && canAccess(i));
-  const transactionItems = navItems.filter(i => i.section === 'transactions' && canAccess(i));
-  const settingsItems = navItems.filter(i => i.section === 'settings' && canAccess(i));
+  const mainItems = navItemDefs.filter(i => i.section === 'main' && canAccess(i));
+  const inventoryItems = navItemDefs.filter(i => i.section === 'inventory' && canAccess(i));
+  const transactionItems = navItemDefs.filter(i => i.section === 'transactions' && canAccess(i));
+  const settingsItems = navItemDefs.filter(i => i.section === 'settings' && canAccess(i));
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
@@ -104,8 +116,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Package size={20} color="white" />
             </div>
             <div>
-              <p style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>Inventory</p>
-              <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Management System</p>
+              <p style={{ fontWeight: '700', fontSize: '15px', color: 'var(--text-primary)' }}>
+                {t('appName')}
+              </p>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                {t('managementSystem')}
+              </p>
             </div>
           </div>
         </div>
@@ -120,20 +136,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }}>
           <div style={{ marginBottom: '14px' }}>
             <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
-              Main
+              {t('sectionMain')}
             </p>
             {mainItems.map(item => (
-              <NavLink key={item.href} item={item} active={pathname === item.href} />
+              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} />
             ))}
           </div>
 
           {inventoryItems.length > 0 && (
             <div style={{ marginBottom: '14px' }}>
               <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
-                Inventory
+                {t('sectionInventory')}
               </p>
               {inventoryItems.map(item => (
-                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} />
               ))}
             </div>
           )}
@@ -141,20 +157,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {transactionItems.length > 0 && (
             <div style={{ marginBottom: '14px' }}>
               <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
-                Transactions
+                {t('sectionTransactions')}
               </p>
               {transactionItems.map(item => (
-                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} />
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} />
               ))}
             </div>
           )}
 
           <div style={{ marginBottom: '8px' }}>
             <p style={{ fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 8px', marginBottom: '4px' }}>
-              Settings
+              {t('sectionSettings')}
             </p>
             {settingsItems.map(item => (
-              <NavLink key={item.href} item={item} active={pathname === item.href} />
+              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} />
             ))}
           </div>
         </nav>
@@ -183,10 +199,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {mounted && user?.fullName ? user.fullName : 'Account'}
+                {mounted && user?.fullName ? user.fullName : t('account')}
               </p>
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {mounted && user?.roles?.[0] ? user.roles[0] : 'Signed in'}
+                {mounted && user?.roles?.[0] ? user.roles[0] : t('signedIn')}
               </p>
             </div>
           </div>
@@ -216,10 +232,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onMouseLeave={e => {
               (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.08)';
             }}
-            title="Sign out of your account"
+            title={t('logout')}
           >
             <LogOut size={15} />
-            <span>Logout</span>
+            <span>{t('logout')}</span>
           </button>
         </div>
       </aside>
@@ -244,24 +260,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   fontWeight: i === arr.length - 1 ? '600' : '400',
                   textTransform: 'capitalize',
                 }}>
-                  {seg}
+                  {t(seg) || seg}
                 </span>
               </div>
             ))}
           </div>
 
           {/* Right side */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <LanguageToggle />
             <ThemeToggle />
             <button style={{
               width: '36px', height: '36px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
               background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
               alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
               transition: 'all 0.15s ease',
-            }} title="Notifications">
+            }} title={t('notifications')}>
               <Bell size={16} />
             </button>
-
 
             {/* Profile Dropdown */}
             <div style={{ position: 'relative' }}>
@@ -276,7 +292,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   boxShadow: userMenuOpen ? '0 0 0 2px var(--brand-primary)' : 'none',
                   transition: 'all 0.15s ease',
                 }}
-                title={mounted && user?.fullName ? user.fullName : 'Profile'}
+                title={mounted && user?.fullName ? user.fullName : t('profile')}
               >
                 {mounted && user?.fullName ? user.fullName[0].toUpperCase() : 'A'}
               </div>
@@ -296,7 +312,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }}>
                     <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '6px' }}>
                       <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
-                        {mounted && user?.fullName ? user.fullName : 'Account'}
+                        {mounted && user?.fullName ? user.fullName : t('account')}
                       </p>
                       <p style={{ fontSize: '11px', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {mounted && user?.email ? user.email : ''}
@@ -329,7 +345,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       }}
                     >
                       <LogOut size={15} />
-                      Log Out
+                      {t('logout')}
                     </button>
                   </div>
                 </>
@@ -347,9 +363,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-function NavLink({ item, active }: {
-  item: { href: string; label: string; icon: React.ComponentType<{ size?: number }> };
+function NavLink({ item, active, label }: {
+  item: { href: string; icon: React.ComponentType<{ size?: number }> };
   active: boolean;
+  label: string;
 }) {
   const Icon = item.icon;
 
@@ -367,7 +384,7 @@ function NavLink({ item, active }: {
       }}
     >
       <Icon size={16} />
-      {item.label}
+      <span>{label}</span>
     </Link>
   );
 }

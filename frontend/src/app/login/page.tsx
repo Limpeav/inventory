@@ -9,6 +9,9 @@ import { z } from 'zod';
 import { Eye, EyeOff, Lock, Mail, Package, AlertCircle, Loader2 } from 'lucide-react';
 import { authApi } from '@/lib/auth-api';
 import { useAuthStore } from '@/store/auth-store';
+import { LanguageToggle } from '@/components/language-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { useTranslation } from '@/lib/i18n/translations';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
@@ -20,6 +23,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth, isAuthenticated } = useAuthStore();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +63,12 @@ export default function LoginPage() {
 
   return (
     <div className="gradient-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      {/* Top right language and theme controls */}
+      <div style={{ position: 'fixed', top: '20px', right: '24px', zIndex: 50, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
+
       {/* Background decorations */}
       <div style={{
         position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0
@@ -88,18 +98,18 @@ export default function LoginPage() {
             <Package size={30} color="white" />
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '6px' }}>
-            <span className="gradient-text">Inventory</span>
-            <span style={{ color: 'var(--text-primary)' }}> System</span>
+            <span className="gradient-text">{t('appName')}</span>
+            <span style={{ color: 'var(--text-primary)' }}> {t('managementSystem')}</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            Sign in to manage your warehouse
+            {t('signInSubtitle')}
           </p>
         </div>
 
         {/* Card */}
         <div className="glass-card" style={{ padding: '36px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '24px', color: 'var(--text-primary)' }}>
-            Welcome back
+            {t('welcomeBack')}
           </h2>
 
           {/* Error alert */}
@@ -117,7 +127,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div style={{ marginBottom: '18px' }}>
-              <label className="label" htmlFor="email">Email</label>
+              <label className="label" htmlFor="email">{t('email')}</label>
               <div style={{ position: 'relative' }}>
                 <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
                   <Mail size={16} />
@@ -125,7 +135,7 @@ export default function LoginPage() {
                 <input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t('enterEmail')}
                   className={`input-field ${errors.email ? 'error' : ''}`}
                   style={{ paddingLeft: '42px' }}
                   {...register('email')}
@@ -141,7 +151,7 @@ export default function LoginPage() {
             {/* Password */}
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <label className="label" htmlFor="password" style={{ marginBottom: 0 }}>Password</label>
+                <label className="label" htmlFor="password" style={{ marginBottom: 0 }}>{t('password')}</label>
                 <Link
                   href="/forgot-password"
                   id="link-forgot-password"
@@ -155,7 +165,7 @@ export default function LoginPage() {
                   onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
                   onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--primary-light)')}
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
               <div style={{ position: 'relative' }}>
@@ -165,7 +175,7 @@ export default function LoginPage() {
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder={t('enterPassword')}
                   className={`input-field ${errors.password ? 'error' : ''}`}
                   style={{ paddingLeft: '42px', paddingRight: '42px' }}
                   {...register('password')}
@@ -200,10 +210,10 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                  Signing in...
+                  {t('signingIn')}
                 </>
               ) : (
-                'Sign In'
+                t('signIn')
               )}
             </button>
           </form>
