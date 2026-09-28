@@ -252,18 +252,18 @@ export default function UsersPage() {
               </button>
             </div>
             {error && <div style={{ padding: '10px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px', color: '#f87171', fontSize: '13px', marginBottom: '16px' }}>{error}</div>}
-            <form onSubmit={createForm.handleSubmit(handleCreate)}>
+            <form onSubmit={createForm.handleSubmit(handleCreate)} autoComplete="off">
               <FormField label="Full Name" error={createForm.formState.errors.fullName?.message}>
                 <input className="input-field" placeholder="John Doe" {...createForm.register('fullName')} />
               </FormField>
               <FormField label="Username" error={createForm.formState.errors.username?.message}>
-                <input className="input-field" placeholder="johndoe" {...createForm.register('username')} />
+                <input className="input-field" placeholder="johndoe" autoComplete="off" {...createForm.register('username')} />
               </FormField>
               <FormField label="Email" error={createForm.formState.errors.email?.message}>
                 <input type="email" className="input-field" placeholder="john@example.com" {...createForm.register('email')} />
               </FormField>
               <FormField label="Password" error={createForm.formState.errors.password?.message}>
-                <input type="password" className="input-field" placeholder="Min 8 characters" {...createForm.register('password')} />
+                <input type="password" className="input-field" placeholder="Min 8 characters" autoComplete="new-password" {...createForm.register('password')} />
               </FormField>
               <FormField label="Roles" error={createForm.formState.errors.roleIds?.message}>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
