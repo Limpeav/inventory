@@ -27,17 +27,20 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByUsername(identifier))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email or username: " + identifier));
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> {
-                    List<SimpleGrantedAuthority> roleAuth = List.of(
-                            new SimpleGrantedAuthority("ROLE_" + role.getName())
-                    );
-                    List<SimpleGrantedAuthority> permAuth = role.getPermissions().stream()
-                            .map(p -> new SimpleGrantedAuthority(p.getName()))
-                            .collect(Collectors.toList());
-                    return java.util.stream.Stream.concat(roleAuth.stream(), permAuth.stream());
-                })
-                .collect(Collectors.toList());
+        List<SimpleGrantedAuthority> authorities = user.getRoles() == null ? List.of() :
+                user.getRoles().stream()
+                        .flatMap(role -> {
+                            List<SimpleGrantedAuthority> roleAuth = List.of(
+                                    new SimpleGrantedAuthority("ROLE_" + role.getName())
+                            );
+                            List<SimpleGrantedAuthority> permAuth = role.getPermissions() != null
+                                    ? role.getPermissions().stream()
+                                            .map(p -> new SimpleGrantedAuthority(p.getName()))
+                                            .collect(Collectors.toList())
+                                    : List.of();
+                            return java.util.stream.Stream.concat(roleAuth.stream(), permAuth.stream());
+                        })
+                        .collect(Collectors.toList());
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

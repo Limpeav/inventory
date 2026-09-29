@@ -24,16 +24,16 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<List<EmployeeResponse>>> findAll(
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+            @RequestParam(name = "activeOnly", defaultValue = "false") boolean activeOnly) {
         List<Employee> list = activeOnly ? employeeService.findAllActive() : employeeService.findAll();
         return ResponseEntity.ok(ApiResponse.success(list.stream().map(this::toResponse).collect(Collectors.toList())));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<EmployeeResponse>> findById(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<EmployeeResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(employeeService.findById(id))));
     }
 
@@ -47,13 +47,13 @@ public class EmployeeController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> update(
-            @PathVariable UUID id, @Valid @RequestBody CreateEmployeeRequest request) {
+            @PathVariable("id") UUID id, @Valid @RequestBody CreateEmployeeRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Employee updated", toResponse(employeeService.update(id, request))));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         employeeService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

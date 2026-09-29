@@ -25,19 +25,19 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ProductResponse>>> findAll(
-            @RequestParam(defaultValue = "false") boolean activeOnly) {
+            @RequestParam(name = "activeOnly", defaultValue = "false") boolean activeOnly) {
         List<Product> products = activeOnly ? productService.findAllActive() : productService.findAll();
         List<ProductResponse> response = products.stream().map(this::toResponse).collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> findById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<ProductResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(productService.findById(id))));
     }
 
     @GetMapping("/barcode/{barcode}")
-    public ResponseEntity<ApiResponse<ProductResponse>> findByBarcode(@PathVariable String barcode) {
+    public ResponseEntity<ApiResponse<ProductResponse>> findByBarcode(@PathVariable("barcode") String barcode) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(productService.findByBarcode(barcode))));
     }
 
@@ -51,13 +51,13 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<ProductResponse>> update(
-            @PathVariable UUID id, @Valid @RequestBody CreateProductRequest request) {
+            @PathVariable("id") UUID id, @Valid @RequestBody CreateProductRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Product updated", toResponse(productService.update(id, request))));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         productService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

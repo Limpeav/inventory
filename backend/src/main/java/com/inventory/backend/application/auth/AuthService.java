@@ -7,23 +7,31 @@ import com.inventory.backend.infrastructure.security.jwt.JwtTokenProvider;
 import com.inventory.backend.presentation.dto.request.LoginRequest;
 import com.inventory.backend.presentation.dto.request.RefreshTokenRequest;
 import com.inventory.backend.presentation.dto.response.AuthResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 /**
- * Application Use Case: Authentication
+ * Application Use Case: Authentication Service
  */
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+
+    public AuthService(AuthenticationManager authenticationManager,
+                       CustomUserDetailsService userDetailsService,
+                       UserRepository userRepository,
+                       JwtTokenProvider jwtTokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     public AuthResponse login(LoginRequest request) {
         String identifier = request.getIdentifier();

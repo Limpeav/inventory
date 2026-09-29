@@ -24,7 +24,7 @@ public class SupplierController {
     private final SupplierService supplierService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<List<SupplierResponse>>> findAll() {
         List<SupplierResponse> list = supplierService.findAll().stream()
                 .map(this::toResponse).collect(Collectors.toList());
@@ -32,8 +32,8 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<SupplierResponse>> findById(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<SupplierResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(supplierService.findById(id))));
     }
 
@@ -47,13 +47,13 @@ public class SupplierController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<SupplierResponse>> update(
-            @PathVariable UUID id, @Valid @RequestBody CreateSupplierRequest request) {
+            @PathVariable("id") UUID id, @Valid @RequestBody CreateSupplierRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Supplier updated", toResponse(supplierService.update(id, request))));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         supplierService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

@@ -1,5 +1,7 @@
 package com.inventory.backend.application.payment;
 
+import com.inventory.backend.domain.purchase.PurchaseRepository;
+import com.inventory.backend.domain.sale.SaleRepository;
 import com.inventory.backend.domain.payment.Payment;
 import com.inventory.backend.domain.payment.PaymentRepository;
 import com.inventory.backend.presentation.dto.request.CreatePaymentRequest;
@@ -19,6 +21,8 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final SaleRepository saleRepository;
+    private final PurchaseRepository purchaseRepository;
 
     @Transactional(readOnly = true)
     public List<Payment> findAll() { return paymentRepository.findAll(); }
@@ -30,8 +34,19 @@ public class PaymentService {
     public BigDecimal getTotalPaid(UUID referenceId) { return paymentRepository.sumByReferenceId(referenceId); }
 
     public Payment create(CreatePaymentRequest request) {
+        String refType = request.getReferenceType().trim().toUpperCase();
+        if ("SALE".equals(refType)) {
+            saleRepository.findById(request.getReferenceId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Sale not found: " + request.getReferenceId()));
+        } else if ("PURCHASE".equals(refType)) {
+            purchaseRepository.findById(request.getReferenceId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Purchase not found: " + request.getReferenceId()));
+        } else {
+            throw new IllegalArgumentException("Invalid reference type '" + request.getReferenceType() + "'. Expected SALE or PURCHASE.");
+        }
+
         Payment payment = new Payment();
-        payment.setReferenceType(request.getReferenceType().toUpperCase());
+        payment.setReferenceType(refType);
         payment.setReferenceId(request.getReferenceId());
         payment.setAmount(request.getAmount());
         payment.setPaymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod().toUpperCase() : "CASH");

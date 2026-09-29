@@ -35,7 +35,7 @@ public class RoleController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<RoleResponse>> findById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<RoleResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(roleService.findById(id))));
     }
 
@@ -49,14 +49,14 @@ public class RoleController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<RoleResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateRoleRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Role updated", toResponse(roleService.update(id, request))));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         roleService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

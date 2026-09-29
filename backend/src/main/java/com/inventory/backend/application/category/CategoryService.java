@@ -42,6 +42,11 @@ public class CategoryService {
 
     public Category update(UUID id, CreateCategoryRequest request) {
         Category category = findById(id);
+        if (request.getName() != null && !request.getName().isBlank()
+                && !request.getName().equalsIgnoreCase(category.getName())
+                && categoryRepository.existsByName(request.getName())) {
+            throw new ResourceAlreadyExistsException("Category already exists: " + request.getName());
+        }
         category.setName(request.getName());
         category.setDescription(request.getDescription());
         return categoryRepository.save(category);

@@ -4,7 +4,6 @@ import com.inventory.backend.domain.employee.Employee;
 import com.inventory.backend.domain.employee.EmployeeRepository;
 import com.inventory.backend.presentation.dto.request.CreateEmployeeRequest;
 import com.inventory.backend.presentation.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,11 +11,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+
+    public EmployeeService(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
 
     @Transactional(readOnly = true)
     public List<Employee> findAll() {
@@ -54,7 +56,18 @@ public class EmployeeService {
 
     private void mapToEmployee(CreateEmployeeRequest request, Employee employee) {
         employee.setName(request.getName());
-        employee.setGender(request.getGender() != null ? request.getGender().toUpperCase() : null);
+        if (request.getGender() != null && !request.getGender().isBlank()) {
+            String g = request.getGender().trim().toUpperCase();
+            if (g.startsWith("M")) {
+                employee.setGender("M");
+            } else if (g.startsWith("F")) {
+                employee.setGender("F");
+            } else {
+                employee.setGender(g.substring(0, 1));
+            }
+        } else {
+            employee.setGender(null);
+        }
         employee.setPhone(request.getPhone());
         employee.setAddress(request.getAddress());
         employee.setStartDate(request.getStartDate());

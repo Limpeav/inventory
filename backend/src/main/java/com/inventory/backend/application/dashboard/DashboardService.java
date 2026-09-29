@@ -7,7 +7,6 @@ import com.inventory.backend.domain.product.ProductRepository;
 import com.inventory.backend.domain.purchase.Purchase;
 import com.inventory.backend.domain.purchase.PurchaseRepository;
 import com.inventory.backend.domain.sale.Sale;
-import com.inventory.backend.domain.sale.SaleItem;
 import com.inventory.backend.domain.sale.SaleRepository;
 import com.inventory.backend.domain.stock.StockRepository;
 import com.inventory.backend.domain.supplier.SupplierRepository;
@@ -47,10 +46,10 @@ public class DashboardService {
         // ── Sales ────────────────────────────────────────────────────────────
         List<Sale> allSales  = saleRepository.findAll();
         List<Sale> todaySales = allSales.stream()
-                .filter(s -> !s.getStatus().equals("CANCELLED") && today.equals(s.getSaleDate()))
+                .filter(s -> !"CANCELLED".equals(s.getStatus()) && today.equals(s.getSaleDate()))
                 .collect(Collectors.toList());
         List<Sale> monthSales = saleRepository.findByDateRange(monthStart, today).stream()
-                .filter(s -> !s.getStatus().equals("CANCELLED"))
+                .filter(s -> !"CANCELLED".equals(s.getStatus()))
                 .collect(Collectors.toList());
 
         BigDecimal todayRevenue = todaySales.stream()
@@ -62,13 +61,13 @@ public class DashboardService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalRevenue = allSales.stream()
-                .filter(s -> !s.getStatus().equals("CANCELLED"))
+                .filter(s -> !"CANCELLED".equals(s.getStatus()))
                 .map(s -> s.getTotalAmount() != null ? s.getTotalAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // ── Purchases ────────────────────────────────────────────────────────
         List<Purchase> monthPurchases = purchaseRepository.findByDateRange(monthStart, today).stream()
-                .filter(p -> !p.getStatus().equals("CANCELLED"))
+                .filter(p -> !"CANCELLED".equals(p.getStatus()))
                 .collect(Collectors.toList());
 
         BigDecimal monthSpend = monthPurchases.stream()
@@ -96,7 +95,7 @@ public class DashboardService {
 
         // ── Recent Sales (last 10) ───────────────────────────────────────────
         List<DashboardStatsResponse.RecentSale> recentSales = allSales.stream()
-                .sorted(Comparator.comparing(Sale::getSaleDate, Comparator.reverseOrder()))
+                .sorted(Comparator.comparing(Sale::getSaleDate, Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(10)
                 .map(s -> DashboardStatsResponse.RecentSale.builder()
                         .id(s.getId().toString())
@@ -112,7 +111,7 @@ public class DashboardService {
         // ── Top Products (by qty sold, all time) ─────────────────────────────
         Map<UUID, double[]> productTotals = new HashMap<>();  // [qty, revenue]
         allSales.stream()
-                .filter(s -> !s.getStatus().equals("CANCELLED"))
+                .filter(s -> !"CANCELLED".equals(s.getStatus()))
                 .flatMap(s -> s.getItems() != null ? s.getItems().stream() : java.util.stream.Stream.empty())
                 .forEach(item -> {
                     productTotals.computeIfAbsent(item.getProductId(), k -> new double[]{0, 0});

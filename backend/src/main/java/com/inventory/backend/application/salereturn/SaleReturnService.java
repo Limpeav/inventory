@@ -62,13 +62,21 @@ public class SaleReturnService {
             Product product = productRepository.findById(ir.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + ir.getProductId()));
 
-            // Find original sale price for this product
-            BigDecimal originalPrice = sale.getItems() == null ? BigDecimal.ZERO :
+            // Find original sale item for this product
+            SaleItem saleItem = sale.getItems() == null ? null :
                     sale.getItems().stream()
                             .filter(si -> si.getProductId().equals(ir.getProductId()))
                             .findFirst()
-                            .map(SaleItem::getUnitPrice)
-                            .orElse(BigDecimal.ZERO);
+                            .orElse(null);
+
+            if (saleItem == null) {
+                throw new IllegalArgumentException("Product '" + product.getName() + "' was not part of this sale");
+            }
+            if (ir.getQuantity() > saleItem.getQuantity()) {
+                throw new IllegalArgumentException("Returned quantity (" + ir.getQuantity() + ") exceeds sold quantity (" + saleItem.getQuantity() + ") for '" + product.getName() + "'");
+            }
+
+            BigDecimal originalPrice = saleItem.getUnitPrice();
 
             // Restore stock
             stockService.adjustStock(ir.getProductId(), ir.getQuantity());

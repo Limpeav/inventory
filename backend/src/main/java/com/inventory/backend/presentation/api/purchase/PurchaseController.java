@@ -2,7 +2,7 @@ package com.inventory.backend.presentation.api.purchase;
 
 import com.inventory.backend.application.purchase.PurchaseService;
 import com.inventory.backend.domain.purchase.Purchase;
-import com.inventory.backend.domain.user.User;
+import com.inventory.backend.domain.user.UserRepository;
 import com.inventory.backend.presentation.dto.request.CreatePurchaseRequest;
 import com.inventory.backend.presentation.dto.response.ApiResponse;
 import com.inventory.backend.presentation.dto.response.PurchaseResponse;
@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -26,12 +27,13 @@ import java.util.stream.Collectors;
 public class PurchaseController {
 
     private final PurchaseService purchaseService;
+    private final UserRepository userRepository;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<List<PurchaseResponse>>> findAll(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+            @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         List<Purchase> purchases = (from != null && to != null)
                 ? purchaseService.findByDateRange(from, to)
                 : purchaseService.findAll();
@@ -39,8 +41,8 @@ public class PurchaseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<PurchaseResponse>> findById(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<PurchaseResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(purchaseService.findById(id))));
     }
 
@@ -48,15 +50,19 @@ public class PurchaseController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<PurchaseResponse>> create(
             @Valid @RequestBody CreatePurchaseRequest request,
-            @AuthenticationPrincipal User currentUser) {
-        UUID userId = currentUser != null ? currentUser.getId() : null;
+            @AuthenticationPrincipal UserDetails principal) {
+        UUID userId = principal != null
+                ? userRepository.findByUsername(principal.getUsername())
+                        .or(() -> userRepository.findByEmail(principal.getUsername()))
+                        .map(u -> u.getId()).orElse(null)
+                : null;
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Purchase created", toResponse(purchaseService.create(request, userId))));
     }
 
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<PurchaseResponse>> cancel(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<PurchaseResponse>> cancel(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success("Purchase cancelled", toResponse(purchaseService.cancel(id))));
     }
 

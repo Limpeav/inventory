@@ -13,7 +13,7 @@ public class CreateEmployeeRequest {
     @Size(max = 150)
     private String name;
 
-    @Pattern(regexp = "^[MFmf]$", message = "Gender must be M or F")
+    @Pattern(regexp = "^(?i)(M|F|MALE|FEMALE)?$", message = "Gender must be M, F, Male, or Female")
     private String gender;
 
     @Size(max = 50)

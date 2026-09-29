@@ -25,9 +25,9 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> findAll(
-            @RequestParam(required = false) UUID referenceId) {
+            @RequestParam(name = "referenceId", required = false) UUID referenceId) {
         List<Payment> list = referenceId != null
                 ? paymentService.findByReferenceId(referenceId)
                 : paymentService.findAll();
@@ -35,20 +35,20 @@ public class PaymentController {
     }
 
     @GetMapping("/reference/{referenceId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<List<PaymentResponse>>> findByReferenceId(@PathVariable UUID referenceId) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> findByReferenceId(@PathVariable("referenceId") UUID referenceId) {
         List<Payment> list = paymentService.findByReferenceId(referenceId);
         return ResponseEntity.ok(ApiResponse.success(list.stream().map(this::toResponse).collect(Collectors.toList())));
     }
 
     @GetMapping("/reference/{referenceId}/total")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<BigDecimal>> getTotalPaid(@PathVariable UUID referenceId) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<BigDecimal>> getTotalPaid(@PathVariable("referenceId") UUID referenceId) {
         return ResponseEntity.ok(ApiResponse.success(paymentService.getTotalPaid(referenceId)));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<PaymentResponse>> create(@Valid @RequestBody CreatePaymentRequest request) {
         Payment created = paymentService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,7 +57,7 @@ public class PaymentController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         paymentService.delete(id);
         return ResponseEntity.ok(ApiResponse.success("Payment deleted", null));
     }

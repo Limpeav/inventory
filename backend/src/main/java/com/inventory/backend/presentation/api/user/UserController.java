@@ -37,7 +37,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or #id.toString() == authentication.name")
-    public ResponseEntity<ApiResponse<UserResponse>> findById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(userService.findById(id))));
     }
 
@@ -52,7 +52,7 @@ public class UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody UpdateUserRequest request) {
         return ResponseEntity.ok(ApiResponse.success("User updated successfully",
                 toResponse(userService.update(id, request))));
@@ -60,7 +60,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         userService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

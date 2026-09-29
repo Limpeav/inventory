@@ -82,8 +82,11 @@ public class RoleService {
     }
 
     public void delete(UUID id) {
-        roleRepository.findById(id)
+        Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + id));
+        if ("ADMIN".equalsIgnoreCase(role.getName())) {
+            throw new IllegalArgumentException("System role 'ADMIN' cannot be deleted");
+        }
         roleRepository.deleteById(id);
     }
 

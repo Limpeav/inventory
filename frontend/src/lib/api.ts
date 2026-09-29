@@ -50,9 +50,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized or 403 Forbidden with expired token
+    // Handle 401 Unauthorized (token expired/missing) — attempt token refresh.
+    // NOTE: 403 Forbidden means the user IS authenticated but lacks the required role.
+    // Refreshing the token will NOT fix a 403, so we must NOT intercept it here.
     if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
+      error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry
     ) {

@@ -48,6 +48,11 @@ public class CustomerService {
 
     public Customer update(UUID id, CreateCustomerRequest request) {
         Customer customer = findById(id);
+        if (request.getCustomerId() != null && !request.getCustomerId().isBlank()
+                && !request.getCustomerId().equalsIgnoreCase(customer.getCustomerId())
+                && customerRepository.existsByCustomerId(request.getCustomerId())) {
+            throw new ResourceAlreadyExistsException("Customer ID already exists: " + request.getCustomerId());
+        }
         mapToCustomer(request, customer);
         return customerRepository.save(customer);
     }

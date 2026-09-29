@@ -25,9 +25,9 @@ public class SaleReturnController {
     private final SaleReturnService saleReturnService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<ApiResponse<List<SaleReturnResponse>>> findAll(
-            @RequestParam(required = false) UUID saleId) {
+            @RequestParam(name = "saleId", required = false) UUID saleId) {
         List<SaleReturn> list = saleId != null
                 ? saleReturnService.findBySaleId(saleId)
                 : saleReturnService.findAll();
@@ -35,8 +35,8 @@ public class SaleReturnController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
-    public ResponseEntity<ApiResponse<SaleReturnResponse>> findById(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<ApiResponse<SaleReturnResponse>> findById(@PathVariable("id") UUID id) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(saleReturnService.findById(id))));
     }
 

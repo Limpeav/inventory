@@ -78,7 +78,7 @@ public class DataSeeder implements CommandLineRunner {
                         inventoryRead, inventoryWrite))
                 .build());
 
-        RoleEntity managerRole = roleRepository.save(RoleEntity.builder()
+        roleRepository.save(RoleEntity.builder()
                 .name("MANAGER")
                 .description("Inventory Manager")
                 .permissions(Set.of(userRead, inventoryRead, inventoryWrite))

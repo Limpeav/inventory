@@ -3,6 +3,7 @@ package com.inventory.backend.application.supplier;
 import com.inventory.backend.domain.supplier.Supplier;
 import com.inventory.backend.domain.supplier.SupplierRepository;
 import com.inventory.backend.presentation.dto.request.CreateSupplierRequest;
+import com.inventory.backend.presentation.exception.ResourceAlreadyExistsException;
 import com.inventory.backend.presentation.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,10 @@ public class SupplierService {
     }
 
     public Supplier create(CreateSupplierRequest request) {
+        if (request.getName() != null && !request.getName().isBlank()
+                && supplierRepository.existsByName(request.getName())) {
+            throw new ResourceAlreadyExistsException("Supplier already exists: " + request.getName());
+        }
         Supplier supplier = new Supplier();
         mapToSupplier(request, supplier);
         return supplierRepository.save(supplier);
@@ -37,6 +42,11 @@ public class SupplierService {
 
     public Supplier update(UUID id, CreateSupplierRequest request) {
         Supplier supplier = findById(id);
+        if (request.getName() != null && !request.getName().isBlank()
+                && !request.getName().equalsIgnoreCase(supplier.getName())
+                && supplierRepository.existsByName(request.getName())) {
+            throw new ResourceAlreadyExistsException("Supplier already exists: " + request.getName());
+        }
         mapToSupplier(request, supplier);
         return supplierRepository.save(supplier);
     }

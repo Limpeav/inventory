@@ -31,13 +31,13 @@ public class StockController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<ApiResponse<StockResponse>> findByProduct(@PathVariable UUID productId) {
+    public ResponseEntity<ApiResponse<StockResponse>> findByProduct(@PathVariable("productId") UUID productId) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(stockService.findByProductId(productId))));
     }
 
     @GetMapping("/low")
     public ResponseEntity<ApiResponse<List<StockResponse>>> findLowStock(
-            @RequestParam(defaultValue = "10") double threshold) {
+            @RequestParam(name = "threshold", defaultValue = "10") double threshold) {
         List<StockResponse> list = stockService.findLowStock(threshold).stream()
                 .map(this::toResponse).collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(list));
@@ -46,16 +46,16 @@ public class StockController {
     @PatchMapping("/product/{productId}/adjust")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<StockResponse>> adjust(
-            @PathVariable UUID productId,
-            @RequestParam double delta) {
+            @PathVariable("productId") UUID productId,
+            @RequestParam("delta") double delta) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(stockService.adjustStock(productId, delta))));
     }
 
     @PutMapping("/product/{productId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<StockResponse>> setStock(
-            @PathVariable UUID productId,
-            @RequestParam double quantity) {
+            @PathVariable("productId") UUID productId,
+            @RequestParam("quantity") double quantity) {
         return ResponseEntity.ok(ApiResponse.success(toResponse(stockService.setStock(productId, quantity))));
     }
 

@@ -30,6 +30,7 @@ public class ProductService {
         return productRepository.findAll().stream()
                 .filter(p -> !p.isDeleted())
                 .collect(Collectors.toList());
+                
     }
 
     @Transactional(readOnly = true)
