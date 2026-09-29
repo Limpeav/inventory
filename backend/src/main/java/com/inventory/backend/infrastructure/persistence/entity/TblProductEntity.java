@@ -63,7 +63,6 @@ public class TblProductEntity {
     @Column(name = "pronamech", length = 50)
     private String pronamech;
 
-    @Lob
-    @Column(name = "pro_image")
+    @Column(name = "pro_image", columnDefinition = "bytea")
     private byte[] proImage;
 }
