@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { Client, IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 
 export type WsEventType =
   | 'SALE_CREATED' | 'SALE_CANCELLED'
@@ -27,14 +26,12 @@ export type WsEventHandler = (event: WsEvent) => void;
 export type WsStatus = 'connecting' | 'connected' | 'disconnected';
 
 /**
- * Resolves the WebSocket URL safely:
- * 1. Uses NEXT_PUBLIC_WS_URL if provided.
- * 2. Otherwise derives from NEXT_PUBLIC_API_URL (e.g. https://.../api/v1 -> https://.../api/v1/ws).
- * 3. Falls back to localhost in local development.
- * 4. Automatically upgrades http:// or ws:// to https:// when running on HTTPS to avoid Mixed Content / SecurityError.
- * 5. Safely skips connecting if deployed on HTTPS but still pointing to localhost.
+ * Resolves the native WebSocket URL (wss:// or ws://):
+ * Spring Boot's SockJS raw websocket endpoint is at /websocket.
+ * Using native WebSockets avoids the legacy SockJS 'unload' event listener,
+ * completely eliminating the Chrome Permissions-Policy violation warning.
  */
-function resolveWsUrl(): string | null {
+function resolveNativeWsUrl(): string | null {
   let url = process.env.NEXT_PUBLIC_WS_URL?.trim();
 
   // If NEXT_PUBLIC_WS_URL is not set, derive from NEXT_PUBLIC_API_URL
@@ -48,13 +45,17 @@ function resolveWsUrl(): string | null {
     url = 'http://localhost:8080/api/v1/ws';
   }
 
+  // Convert http(s) to ws(s)
+  if (url.startsWith('https://')) {
+    url = 'wss://' + url.slice(8);
+  } else if (url.startsWith('http://')) {
+    url = 'ws://' + url.slice(7);
+  }
+
   // Running in browser over HTTPS
   if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
-    // SockJS requires http/https protocol (never ws:// or wss://)
-    if (url.startsWith('ws://') || url.startsWith('http://')) {
-      url = 'https://' + url.replace(/^(ws|http):\/\//, '');
-    } else if (url.startsWith('wss://')) {
-      url = 'https://' + url.slice(6);
+    if (url.startsWith('ws://')) {
+      url = 'wss://' + url.slice(5);
     }
 
     // If on a remote domain but URL still points to localhost, skip connecting
@@ -62,10 +63,15 @@ function resolveWsUrl(): string | null {
     if (isRemotePage && (url.includes('localhost') || url.includes('127.0.0.1'))) {
       console.warn(
         '[useWebSocket] Page is running over HTTPS in production, but WebSocket URL points to localhost. ' +
-        'Please configure NEXT_PUBLIC_WS_URL (e.g. https://your-backend.onrender.com/api/v1/ws) in your hosting environment variables.'
+        'Please configure NEXT_PUBLIC_WS_URL in your hosting environment variables.'
       );
       return null;
     }
+  }
+
+  // Append /websocket for Spring SockJS raw websocket endpoint
+  if (!url.endsWith('/websocket')) {
+    url = `${url.replace(/\/+$/, '')}/websocket`;
   }
 
   return url;
@@ -97,7 +103,7 @@ export function useWebSocket(
   }, [onStatusChange]);
 
   const connect = useCallback(() => {
-    const wsUrl = resolveWsUrl();
+    const wsUrl = resolveNativeWsUrl();
     if (!wsUrl) {
       statusRef.current?.('disconnected');
       return () => {};
@@ -105,15 +111,9 @@ export function useWebSocket(
 
     statusRef.current?.('connecting');
 
+    // Use native WebSocket via brokerURL (eliminates sockjs-client unload warning)
     const client = new Client({
-      webSocketFactory: () => {
-        try {
-          return new SockJS(wsUrl) as WebSocket;
-        } catch (err) {
-          console.warn('[useWebSocket] SockJS creation failed:', err);
-          throw err;
-        }
-      },
+      brokerURL: wsUrl,
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
