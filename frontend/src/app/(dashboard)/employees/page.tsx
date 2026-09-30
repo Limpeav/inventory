@@ -77,7 +77,7 @@ function EmployeeModal({
         )}
 
         <form onSubmit={submit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="form-grid-2">
             <div style={{ gridColumn: '1 / -1' }}>
               <label className="label">{t('employeeNameRequired')}</label>
               <input className="input-field" required value={form.name} onChange={e => handle('name', e.target.value)} placeholder="Employee full name" />
@@ -186,7 +186,7 @@ export default function EmployeesPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('employees')}</h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('manageEmployees')}</p>
@@ -197,7 +197,7 @@ export default function EmployeesPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="grid-stats-4">
         {[
           { label: t('totalStaff'),  value: stats.total,    icon: Users,     color: '#6366f1' },
           { label: t('active'),       value: stats.active,   icon: UserCheck, color: '#10b981' },
@@ -217,8 +217,8 @@ export default function EmployeesPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div className="toolbar-container">
+        <div className="toolbar-search">
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchEmployeesPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>

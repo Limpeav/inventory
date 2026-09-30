@@ -57,7 +57,7 @@ export default function StockPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('stockLevels')}</h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('stockSubtitle')}</p>
@@ -66,7 +66,7 @@ export default function StockPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="grid-stats-3">
         {[
           { label: t('productsTracked'), value: totalItems, icon: Package, color: '#6366f1' },
           { label: t('lowStockAlerts'),  value: lowStockCount, icon: AlertTriangle, color: lowStockCount > 0 ? '#ef4444' : '#10b981' },
@@ -85,8 +85,8 @@ export default function StockPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div className="toolbar-container">
+        <div className="toolbar-search">
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchStockPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>

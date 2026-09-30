@@ -6,7 +6,8 @@ import Link from 'next/link';
 import {
   LayoutDashboard, Users, Shield, Package, ChevronRight,
   LogOut, Settings, Bell, ShoppingCart, Truck, UserCheck,
-  Tag, BarChart3, Warehouse, Receipt, RotateCcw, CreditCard, DollarSign
+  Tag, BarChart3, Warehouse, Receipt, RotateCcw, CreditCard, DollarSign,
+  Menu, X
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
@@ -48,10 +49,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { t, language } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const token = Cookies.get('accessToken');
@@ -80,32 +86,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const settingsItems = navItemDefs.filter(i => i.section === 'settings' && canAccess(i));
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-base)' }}>
+    <div className="layout-container">
+      {/* Mobile Backdrop */}
+      {mobileNavOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside
-        className="sidebar"
-        style={{
-          width: '260px',
-          height: '100vh',
-          maxHeight: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: 'var(--bg-surface)',
-          borderRight: '1px solid var(--border-subtle)',
-          zIndex: 40,
-          overflow: 'hidden',
-        }}
-      >
+      <aside className={`sidebar ${mobileNavOpen ? 'sidebar-open' : ''}`}>
         {/* Logo */}
         <div style={{
-          padding: '18px 18px',
+          padding: '16px 18px',
           borderBottom: '1px solid var(--border-subtle)',
           flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
@@ -126,6 +126,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </p>
             </div>
           </div>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setMobileNavOpen(false)}
+            aria-label="Close navigation"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Nav */}
@@ -141,7 +148,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {t('sectionMain')}
             </p>
             {mainItems.map(item => (
-              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} />
+              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} onClick={() => setMobileNavOpen(false)} />
             ))}
           </div>
 
@@ -151,7 +158,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {t('sectionInventory')}
               </p>
               {inventoryItems.map(item => (
-                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} />
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} onClick={() => setMobileNavOpen(false)} />
               ))}
             </div>
           )}
@@ -162,7 +169,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {t('sectionTransactions')}
               </p>
               {transactionItems.map(item => (
-                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} />
+                <NavLink key={item.href} item={item} active={pathname.startsWith(item.href)} label={t(item.translationKey)} onClick={() => setMobileNavOpen(false)} />
               ))}
             </div>
           )}
@@ -172,7 +179,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {t('sectionSettings')}
             </p>
             {settingsItems.map(item => (
-              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} />
+              <NavLink key={item.href} item={item} active={pathname === item.href} label={t(item.translationKey)} onClick={() => setMobileNavOpen(false)} />
             ))}
           </div>
         </nav>
@@ -243,33 +250,43 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, marginLeft: '260px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <main className="main-content">
         {/* Top bar */}
-        <header style={{
-          height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 28px', borderBottom: '1px solid var(--border-subtle)',
-          background: 'var(--header-bg)', backdropFilter: 'blur(10px)',
-          position: 'sticky', top: 0, zIndex: 30,
-        }}>
-          {/* Breadcrumb */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {pathname.split('/').filter(Boolean).map((seg, i, arr) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {i > 0 && <ChevronRight size={14} color="var(--text-muted)" />}
-                <span style={{
-                  fontSize: '14px',
-                  color: i === arr.length - 1 ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontWeight: i === arr.length - 1 ? '600' : '400',
-                  textTransform: 'capitalize',
-                }}>
-                  {t(seg) || seg}
-                </span>
-              </div>
-            ))}
+        <header className="header-bar">
+          {/* Left side: hamburger button + breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, overflow: 'hidden' }}>
+            <button
+              id="mobile-nav-toggle-btn"
+              className="mobile-menu-btn"
+              onClick={() => setMobileNavOpen(true)}
+              aria-label="Open sidebar menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* Breadcrumb */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              {pathname.split('/').filter(Boolean).map((seg, i, arr) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                  {i > 0 && <ChevronRight size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />}
+                  <span style={{
+                    fontSize: '14px',
+                    color: i === arr.length - 1 ? 'var(--text-primary)' : 'var(--text-muted)',
+                    fontWeight: i === arr.length - 1 ? '600' : '400',
+                    textTransform: 'capitalize',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {t(seg) || seg}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Right side */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <LanguageToggle />
             <ThemeToggle />
             <button style={{
@@ -357,7 +374,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <div style={{ flex: 1, padding: '28px', overflowY: 'auto' }}>
+        <div className="dashboard-content-area">
           <RealtimeProvider>
             {children}
           </RealtimeProvider>
@@ -367,16 +384,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-function NavLink({ item, active, label }: {
+function NavLink({ item, active, label, onClick }: {
   item: { href: string; icon: React.ComponentType<{ size?: number }> };
   active: boolean;
   label: string;
+  onClick?: () => void;
 }) {
   const Icon = item.icon;
 
   return (
     <Link
       href={item.href}
+      onClick={onClick}
       style={{
         display: 'flex', alignItems: 'center', gap: '10px',
         padding: '9px 12px', borderRadius: '10px', marginBottom: '2px',

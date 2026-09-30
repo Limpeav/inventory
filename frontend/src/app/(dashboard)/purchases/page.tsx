@@ -115,7 +115,7 @@ function CreatePurchaseModal({
         )}
 
         <form onSubmit={submit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
+          <div className="form-grid-3">
             <div><label className="label">{t('poReference')}</label><input className="input-field" value={referenceCode} onChange={e => setReferenceCode(e.target.value)} placeholder="Auto-generated if blank" /></div>
             <div><label className="label">{t('purchaseDate')}</label><input className="input-field" type="date" required value={purchaseDate} onChange={e => setPurchaseDate(e.target.value)} /></div>
             <div><label className="label">{t('expectedDelivery')}</label><input className="input-field" type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} /></div>
@@ -148,8 +148,8 @@ function CreatePurchaseModal({
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{t('lineItems')}</span>
               <button type="button" className="btn-secondary" style={{ padding: '5px 12px', fontSize: 12 }} onClick={addLine}><Plus size={13} /> {t('addLine')}</button>
             </div>
-            <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflowX: 'auto', border: '1px solid var(--border)' }}>
+              <table style={{ width: '100%', minWidth: '550px', borderCollapse: 'collapse' }}>
                 <thead><tr style={{ background: 'var(--bg-card)' }}>
                   {[t('colProduct'), t('quantity'), t('unitCost'), t('discount'), t('subtotal'), ''].map((h, idx) => (
                     <th key={idx} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
@@ -406,7 +406,7 @@ export default function PurchasesPage() {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('purchases')}</h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('purchasesSubtitle')}</p>
@@ -415,7 +415,7 @@ export default function PurchasesPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="grid-stats-3">
         {[
           { label: t('totalOrders'),   value: stats.total,    icon: ShoppingCart,  color: '#6366f1' },
           { label: t('received'),       value: stats.received, icon: CheckCircle2,  color: '#10b981' },
@@ -432,8 +432,8 @@ export default function PurchasesPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div className="toolbar-container">
+        <div className="toolbar-search">
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchPurchasesPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>

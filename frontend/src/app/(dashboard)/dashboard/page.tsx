@@ -47,10 +47,7 @@ export default function DashboardPage() {
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-        marginBottom: '28px', flexWrap: 'wrap', gap: '16px',
-      }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: '26px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>
             {t('welcomeBack')}, <span className="gradient-text">{user?.fullName?.split(' ')[0] || 'Admin'}</span> 👋
@@ -243,7 +240,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Content Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)', gap: '24px' }}>
+      <div className="dashboard-split-grid">
         {/* Left Column: Low Stock Alerts & Top Selling Products */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Low Stock Watchlist */}
@@ -382,7 +379,7 @@ export default function DashboardPage() {
             <h2 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {t('quickActions')}
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
               <Link
                 href="/sales"
                 style={{

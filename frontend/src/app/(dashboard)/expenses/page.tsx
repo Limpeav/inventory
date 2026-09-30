@@ -177,10 +177,7 @@ export default function ExpensesPage() {
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: '24px', flexWrap: 'wrap', gap: '16px',
-      }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <DollarSign size={24} color="#ec4899" />
@@ -495,7 +492,7 @@ export default function ExpensesPage() {
             )}
 
             <form onSubmit={handleCreateExpense} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Date *
@@ -564,7 +561,7 @@ export default function ExpensesPage() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Reference # / Receipt

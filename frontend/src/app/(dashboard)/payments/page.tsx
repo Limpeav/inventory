@@ -145,10 +145,7 @@ export default function PaymentsPage() {
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: '24px', flexWrap: 'wrap', gap: '16px',
-      }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <CreditCard size={24} color="#6366f1" />
@@ -474,7 +471,7 @@ export default function PaymentsPage() {
               </div>
 
               {/* Amount and Method */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+              <div className="form-grid-2" style={{ marginBottom: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     {t('paymentAmount')}

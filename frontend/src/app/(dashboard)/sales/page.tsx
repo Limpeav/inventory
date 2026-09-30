@@ -85,7 +85,7 @@ function CreateSaleModal({
         {error && <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, marginBottom: 16, color: '#f87171', fontSize: 13 }}><AlertCircle size={15} />{error}</div>}
         <form onSubmit={submit}>
           {/* Header fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 20 }}>
+          <div className="form-grid-3">
             <div><label className="label">{t('invoiceNumber')}</label><input className="input-field" value={invoiceCode} onChange={e => setInvoiceCode(e.target.value)} placeholder="Auto-generated if blank" /></div>
             <div><label className="label">{t('date')} *</label><input className="input-field" type="date" required value={saleDate} onChange={e => setSaleDate(e.target.value)} /></div>
             <div><label className="label">{t('selectCustomer')}</label>
@@ -118,8 +118,8 @@ function CreateSaleModal({
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{t('lineItems')}</span>
               <button type="button" className="btn-secondary" style={{ padding: '5px 12px', fontSize: 12 }} onClick={addLine}><Plus size={13} /> {t('addLine')}</button>
             </div>
-            <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: 10, overflowX: 'auto', border: '1px solid var(--border)' }}>
+              <table style={{ width: '100%', minWidth: '550px', borderCollapse: 'collapse' }}>
                 <thead><tr style={{ background: 'var(--bg-card)' }}>
                   {[t('colProduct'), t('quantity'), t('unitPrice'), t('discount'), t('subtotal'), ''].map((h, idx) => (
                     <th key={idx} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
@@ -241,7 +241,7 @@ export default function SalesPage() {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{t('sales')}</h1>
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('salesSubtitle')}</p>
@@ -250,7 +250,7 @@ export default function SalesPage() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="grid-stats-3">
         {[
           { label: t('totalSales'),   value: stats.total,     icon: Receipt,      color: '#6366f1' },
           { label: t('completed'),     value: stats.completed, icon: CheckCircle2, color: '#10b981' },
@@ -267,8 +267,8 @@ export default function SalesPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-        <div style={{ position: 'relative', flex: 1 }}>
+      <div className="toolbar-container">
+        <div className="toolbar-search">
           <Search size={15} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input className="input-field" style={{ paddingLeft: 40 }} placeholder={t('searchSalesPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
         </div>

@@ -108,7 +108,7 @@ export default function RolesPage() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+      <div className="page-header-row">
         <div>
           <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'var(--text-primary)' }}>{t('rolesAndAccess')}</h1>
           <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
