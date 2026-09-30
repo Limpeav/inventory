@@ -18,10 +18,7 @@ export default function RealtimeProvider({ children }: { children?: React.ReactN
   }, [pushWsEvent]);
 
   // Listen to /topic/events (all events from the server)
-  useWebSocket('/topic/events', useCallback((event: WsEvent) => {
-    setWsStatus('connected');
-    handleEvent(event);
-  }, [handleEvent]));
+  useWebSocket('/topic/events', handleEvent, setWsStatus);
 
   return (
     <>
