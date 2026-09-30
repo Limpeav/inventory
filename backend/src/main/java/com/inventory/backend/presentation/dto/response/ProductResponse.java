@@ -27,6 +27,8 @@ public class ProductResponse {
     private LocalDate startDate;
     private String productType;
     private String nameKh;
+    private String brand;
+    private String condition;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

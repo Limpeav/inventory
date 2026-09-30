@@ -71,6 +71,13 @@ public class ProductEntity {
     @Column(name = "name_kh", length = 500)
     private String nameKh;
 
+    @Column(length = 100)
+    private String brand;
+
+    @Column(length = 50)
+    @Builder.Default
+    private String condition = "NEW";
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

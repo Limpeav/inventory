@@ -17,6 +17,8 @@ export interface Product {
   startDate?: string;
   productType?: string;
   nameKh?: string;
+  brand?: string;
+  condition?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -35,6 +37,8 @@ export interface CreateProductRequest {
   startDate?: string;
   productType?: string;
   nameKh?: string;
+  brand?: string;
+  condition?: string;
 }
 
 export const productApi = {

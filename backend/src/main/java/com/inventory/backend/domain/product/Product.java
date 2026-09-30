@@ -25,6 +25,8 @@ public class Product {
     private LocalDate startDate;
     private String productType;   // maps dbo.TblProducts.proType
     private String nameKh;        // maps dbo.TblProducts.pronamech
+    private String brand;         // e.g. Juki, Jack, Brother, Siruba, Singer
+    private String condition = "NEW"; // NEW, USED, REFURBISHED
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -84,6 +86,12 @@ public class Product {
 
     public String getNameKh() { return nameKh; }
     public void setNameKh(String nameKh) { this.nameKh = nameKh; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
+
+    public String getCondition() { return condition; }
+    public void setCondition(String condition) { this.condition = condition; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

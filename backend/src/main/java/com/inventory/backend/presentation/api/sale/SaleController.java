@@ -72,6 +72,8 @@ public class SaleController {
                         .id(i.getId()).productId(i.getProductId()).productName(i.getProductName())
                         .quantity(i.getQuantity()).unitPrice(i.getUnitPrice()).discount(i.getDiscount())
                         .subtotal(i.getSubtotal())
+                        .serialNumber(i.getSerialNumber())
+                        .warrantyMonths(i.getWarrantyMonths())
                         .build()).collect(Collectors.toList());
 
         return SaleResponse.builder()

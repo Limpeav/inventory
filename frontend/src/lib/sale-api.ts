@@ -8,6 +8,8 @@ export interface SaleItem {
   unitPrice: number;
   discount?: number;
   subtotal?: number;
+  serialNumber?: string;
+  warrantyMonths?: number;
 }
 
 export interface Sale {
@@ -39,7 +41,14 @@ export interface CreateSaleRequest {
   currency?: string;
   discount?: number;
   note?: string;
-  items: { productId: string; quantity: number; unitPrice: number; discount?: number }[];
+  items: {
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+    discount?: number;
+    serialNumber?: string;
+    warrantyMonths?: number;
+  }[];
 }
 
 export const saleApi = {

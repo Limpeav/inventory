@@ -87,6 +87,8 @@ public class SaleService {
             item.setQuantity(ir.getQuantity());
             item.setUnitPrice(ir.getUnitPrice());
             item.setDiscount(ir.getDiscount() != null ? ir.getDiscount() : BigDecimal.ZERO);
+            item.setSerialNumber(ir.getSerialNumber());
+            item.setWarrantyMonths(ir.getWarrantyMonths() != null ? ir.getWarrantyMonths() : 0);
             items.add(item);
         }
         sale.setItems(items);

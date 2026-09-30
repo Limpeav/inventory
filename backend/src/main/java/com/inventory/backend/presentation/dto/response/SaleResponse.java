@@ -40,5 +40,7 @@ public class SaleResponse {
         private BigDecimal unitPrice;
         private BigDecimal discount;
         private BigDecimal subtotal;
+        private String serialNumber;
+        private Integer warrantyMonths;
     }
 }

@@ -35,4 +35,11 @@ public class SaleItemEntity {
     @Column(precision = 15, scale = 4)
     @Builder.Default
     private BigDecimal discount = BigDecimal.ZERO;
+
+    @Column(name = "serial_number", length = 100)
+    private String serialNumber;
+
+    @Column(name = "warranty_months")
+    @Builder.Default
+    private Integer warrantyMonths = 0;
 }

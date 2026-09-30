@@ -43,5 +43,7 @@ public class CreateSaleRequest {
         private BigDecimal unitPrice;
 
         private BigDecimal discount;
+        private String serialNumber;
+        private Integer warrantyMonths;
     }
 }

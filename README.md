@@ -6,6 +6,9 @@ A production-ready, full-stack warehouse and inventory management platform built
 
 ## 🚀 Key Features
 
+- **🧵 Sewing Machine & Garment Equipment Domain (ម៉ាស៊ីនកាត់ដេរ)**: Tailored specifically for industrial and domestic sewing equipment trading, supporting top brands (JUKI, JACK, Brother, Siruba, Singer, Pegasus, Yamato).
+- **✨ Machine Condition & Unit Tracking**: Distinguish between **Brand New (ថ្មីសុទ្ធ)**, **Used/Second-hand (មួយទឹក)**, and **Refurbished (កែច្នៃ)** machines, as well as **Complete Set (មួយឈុត: Head + Stand + Motor)** vs. **Head Only (ក្បាល)** and spare parts/needles/oil.
+- **🛡️ Serial Number (S/N) & Warranty Management**: Per-machine serial number tracking on invoices with selectable warranty terms (3, 6, 12, 24 months) and printable official **Warranty Certificate & Sales Receipt**.
 - **🔐 Enterprise Authentication & RBAC**: JWT access/refresh token rotation, password recovery via secure email tokens, and fine-grained permissions for **ADMIN**, **MANAGER**, and **STAFF** roles.
 - **⚡ Real-Time WebSocket Streaming**: Instant live push notifications for sales orders, stock adjustments, procurement receipts, and recorded expenses.
 - **📊 Comprehensive Executive Dashboard**: KPI metric tracking (Revenue, Procurement Spend, Low Stock Alerts, Network statistics) with shimmer skeleton loaders and micro-animations.
@@ -184,7 +187,9 @@ All API endpoints are prefixed with `/api/v1`:
 | | `PUT`, `DELETE` | `/products/{id}` | Update or soft-delete product |
 | **Categories** | `GET`, `POST` | `/categories` | List / create product categories |
 | **Stock** | `GET` | `/stock` | View inventory levels across items |
-| | `POST` | `/stock/adjust` | Manual inventory count adjustment |
+| | `GET` | `/stock/low` | View products with low inventory alerts |
+| | `PATCH` | `/stock/product/{productId}/adjust` | Manual inventory count delta adjustment |
+| | `PUT` | `/stock/product/{productId}` | Set inventory quantity directly |
 | **Sales** | `GET`, `POST` | `/sales` | List / record sales invoice orders |
 | | `GET` | `/sales/{id}` | Get sale invoice details |
 | **Purchases** | `GET`, `POST` | `/purchases` | List / create purchase procurement |

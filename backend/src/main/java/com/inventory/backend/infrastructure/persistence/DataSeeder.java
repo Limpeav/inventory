@@ -1,10 +1,16 @@
 package com.inventory.backend.infrastructure.persistence;
 
+import com.inventory.backend.infrastructure.persistence.entity.CategoryEntity;
 import com.inventory.backend.infrastructure.persistence.entity.PermissionEntity;
+import com.inventory.backend.infrastructure.persistence.entity.ProductEntity;
 import com.inventory.backend.infrastructure.persistence.entity.RoleEntity;
+import com.inventory.backend.infrastructure.persistence.entity.StockItemEntity;
 import com.inventory.backend.infrastructure.persistence.entity.UserEntity;
+import com.inventory.backend.infrastructure.persistence.repository.JpaCategoryRepository;
 import com.inventory.backend.infrastructure.persistence.repository.JpaPermissionRepository;
+import com.inventory.backend.infrastructure.persistence.repository.JpaProductRepository;
 import com.inventory.backend.infrastructure.persistence.repository.JpaRoleRepository;
+import com.inventory.backend.infrastructure.persistence.repository.JpaStockRepository;
 import com.inventory.backend.infrastructure.persistence.repository.JpaUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +19,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,6 +40,9 @@ public class DataSeeder implements CommandLineRunner {
     private final JpaUserRepository userRepository;
     private final JpaRoleRepository roleRepository;
     private final JpaPermissionRepository permissionRepository;
+    private final JpaCategoryRepository categoryRepository;
+    private final JpaProductRepository productRepository;
+    private final JpaStockRepository stockRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.enabled:true}")
@@ -54,8 +67,13 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
+        seedAdminAndRoles();
+        seedSewingInventory();
+    }
+
+    private void seedAdminAndRoles() {
         if (roleRepository.existsByName("ADMIN")) {
-            log.info("Roles and users already present in database. Skipping initial seed.");
+            log.info("Roles and users already present in database. Skipping role seed.");
             return;
         }
 
@@ -136,5 +154,135 @@ public class DataSeeder implements CommandLineRunner {
                 .resource(resource)
                 .action(action)
                 .build();
+    }
+
+    private void seedSewingInventory() {
+        if (categoryRepository.findByName("Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)").isPresent()
+                && productRepository.findByBarcode("SM-JK8700-N").isPresent()) {
+            log.info("Sewing machine categories and products already present. Skipping seed.");
+            return;
+        }
+
+        log.info("Seeding sewing machine categories, equipment, spare parts, and initial stock...");
+
+        Map<String, CategoryEntity> catMap = new HashMap<>();
+        String[][] categories = {
+            {"Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)", "Single needle and double needle industrial lockstitch machines for garment production"},
+            {"Overlock & Sergers (ម៉ាស៊ីនវ៉ៃរ៉ង)", "3/4/5 thread industrial and portable overlock edge hemming machines"},
+            {"Coverstitch & Interlock (ម៉ាស៊ីនរ៉ង់កៅស៊ូ)", "Bottom hem and elastic sewing interlock machines for sportswear and t-shirts"},
+            {"Heavy Duty & Leather (ម៉ាស៊ីនដេរស្បែក)", "Walking foot and cylinder bed heavy-duty sewing machines for jeans, bags, and shoes"},
+            {"Spare Parts & Needles (គ្រឿងបន្លាស់ & ម្ជុល)", "Replacement sewing needles, bobbins, rotary hooks, loopers, and knife blades"},
+            {"Accessories & Lubricants (ឧបករណ៍ជំនួយ & ប្រេង)", "Sewing machine lubricants, presser feet, bias binders, LED work lights"}
+        };
+
+        for (String[] cat : categories) {
+            CategoryEntity entity = categoryRepository.findByName(cat[0]).orElseGet(() ->
+                categoryRepository.save(CategoryEntity.builder()
+                        .name(cat[0])
+                        .description(cat[1])
+                        .build())
+            );
+            catMap.put(cat[0], entity);
+        }
+
+        if (productRepository.findByBarcode("SM-JK8700-N").isEmpty()) {
+            seedProduct("Juki DDL-8700 Industrial Lockstitch",
+                    "SM-JK8700-N", "DDL-8700", "JUKI", "NEW", "Set", "MACHINE",
+                    "ម៉ាស៊ីនដេរត្រង់ ជូគី DDL-8700 (ថ្មីសុទ្ធ)",
+                    "High-speed single needle lockstitch machine complete set (head, table stand, silent servo motor).",
+                    catMap.get("Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)"),
+                    new BigDecimal("380.00"), new BigDecimal("480.00"), 5, 12);
+
+            seedProduct("Juki DDL-8700 (Used Japan / មួយទឹក)",
+                    "SM-JK8700-U", "DDL-8700", "JUKI", "USED", "Set", "MACHINE",
+                    "ម៉ាស៊ីនដេរត្រង់ ជូគី DDL-8700 (មួយទឹក ជប៉ុន)",
+                    "Original second-hand single needle lockstitch machine imported from Japan. Fully tuned with 6 months warranty.",
+                    catMap.get("Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)"),
+                    new BigDecimal("180.00"), new BigDecimal("260.00"), 3, 8);
+
+            seedProduct("Jack F4 Direct-Drive Lockstitch",
+                    "SM-JKF4-N", "F4", "JACK", "NEW", "Set", "MACHINE",
+                    "ម៉ាស៊ីនដេរត្រង់ JACK F4 សន្សំសំចៃភ្លើង (ថ្មី)",
+                    "Power-saving direct-drive industrial lockstitch machine with needle positioning and LED lighting.",
+                    catMap.get("Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)"),
+                    new BigDecimal("260.00"), new BigDecimal("340.00"), 5, 15);
+
+            seedProduct("Siruba 747K 4-Thread Overlock",
+                    "SM-SR747K-N", "747K", "SIRUBA", "NEW", "Set", "MACHINE",
+                    "ម៉ាស៊ីនវ៉ៃរ៉ង Siruba 747K ៤សរសៃ (ថ្មី)",
+                    "High-speed 4-thread industrial overlock machine with table, stand, and direct drive motor.",
+                    catMap.get("Overlock & Sergers (ម៉ាស៊ីនវ៉ៃរ៉ង)"),
+                    new BigDecimal("470.00"), new BigDecimal("580.00"), 4, 6);
+
+            seedProduct("Siruba 747K (Used / មួយទឹក)",
+                    "SM-SR747K-U", "747K", "SIRUBA", "USED", "Set", "MACHINE",
+                    "ម៉ាស៊ីនវ៉ៃរ៉ង Siruba 747K (មួយទឹក)",
+                    "Tested and serviced second-hand 4-thread overlock machine with 6 months warranty.",
+                    catMap.get("Overlock & Sergers (ម៉ាស៊ីនវ៉ៃរ៉ង)"),
+                    new BigDecimal("230.00"), new BigDecimal("320.00"), 2, 5);
+
+            seedProduct("Brother Innov-is A80 Domestic Computerized",
+                    "SM-BR-A80", "Innov-is A80", "BROTHER", "NEW", "Head", "MACHINE",
+                    "ម៉ាស៊ីនដេរខ្នាតតូច Brother Innov-is A80 (តាមផ្ទះ)",
+                    "Compact computerized domestic sewing machine with 80 built-in stitches and automatic needle threader.",
+                    catMap.get("Lockstitch Machines (ម៉ាស៊ីនដេរត្រង់)"),
+                    new BigDecimal("320.00"), new BigDecimal("420.00"), 3, 7);
+
+            seedProduct("Organ Sewing Machine Needles DBx1 #14",
+                    "SP-OG-DBX1-14", "DBx1 #14", "ORGAN", "NEW", "Box", "SPARE_PART",
+                    "ម្ជុលដេរ Organ DBx1 លេខ១៤ (១០ដើម/ប្រអប់)",
+                    "Authentic Japanese Organ needles size 14 for medium fabric lockstitch sewing.",
+                    catMap.get("Spare Parts & Needles (គ្រឿងបន្លាស់ & ម្ជុល)"),
+                    new BigDecimal("1.80"), new BigDecimal("3.50"), 20, 100);
+
+            seedProduct("Singer Clear Sewing Machine Oil 1L",
+                    "AC-SG-OIL-1L", "White Oil 1L", "SINGER", "NEW", "Bottle", "ACCESSORY",
+                    "ប្រេងម៉ាស៊ីនដេរ Singer សស្អាត ១លីត្រ",
+                    "High-grade white lubricating mineral oil formulated for industrial and domestic sewing machines.",
+                    catMap.get("Accessories & Lubricants (ឧបករណ៍ជំនួយ & ប្រេង)"),
+                    new BigDecimal("2.20"), new BigDecimal("4.50"), 15, 60);
+
+            seedProduct("Industrial Rotary Hook Assembly KHS12-S",
+                    "SP-RH-KHS12", "KHS12-S", "HIROSE / JUKI", "NEW", "Pcs", "SPARE_PART",
+                    "ត្រសាលម៉ាស៊ីនដេរត្រង់ Hirose KHS12-S",
+                    "Precision rotary hook assembly compatible with Juki DDL-8700, Jack F4, and Brother industrial machines.",
+                    catMap.get("Spare Parts & Needles (គ្រឿងបន្លាស់ & ម្ជុល)"),
+                    new BigDecimal("9.50"), new BigDecimal("18.00"), 10, 30);
+
+            log.info("✅ Successfully seeded sewing machine inventory and initial stock levels.");
+        }
+    }
+
+    private void seedProduct(String name, String barcode, String model, String brand,
+                             String condition, String packageUnit, String productType,
+                             String nameKh, String description, CategoryEntity category,
+                             BigDecimal cost, BigDecimal price, double reorderLevel, double initialStock) {
+        if (productRepository.findByBarcode(barcode).isPresent()) {
+            return;
+        }
+        ProductEntity prod = productRepository.save(ProductEntity.builder()
+                .name(name)
+                .barcode(barcode)
+                .model(model)
+                .brand(brand)
+                .condition(condition)
+                .packageUnit(packageUnit)
+                .productType(productType)
+                .nameKh(nameKh)
+                .description(description)
+                .categoryId(category != null ? category.getId() : null)
+                .cost(cost)
+                .price(price)
+                .reorderLevel(reorderLevel)
+                .startDate(LocalDate.now())
+                .hidden(false)
+                .deleted(false)
+                .build());
+
+        stockRepository.save(StockItemEntity.builder()
+                .productId(prod.getId())
+                .quantity(initialStock)
+                .reservedQty(0)
+                .build());
     }
 }

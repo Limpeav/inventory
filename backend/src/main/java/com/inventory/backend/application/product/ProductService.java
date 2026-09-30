@@ -102,6 +102,8 @@ public class ProductService {
         product.setStartDate(request.getStartDate());
         product.setProductType(request.getProductType());
         product.setNameKh(request.getNameKh());
+        product.setBrand(request.getBrand());
+        product.setCondition(request.getCondition() != null && !request.getCondition().isBlank() ? request.getCondition() : "NEW");
         product.setDeleted(false);
     }
 

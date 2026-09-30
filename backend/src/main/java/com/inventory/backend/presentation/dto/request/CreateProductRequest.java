@@ -42,6 +42,12 @@ public class CreateProductRequest {
     @Size(max = 50)
     private String productType;
 
-    @Size(max = 50)
+    @Size(max = 250)
     private String nameKh;
+
+    @Size(max = 100)
+    private String brand;
+
+    @Size(max = 50)
+    private String condition;
 }

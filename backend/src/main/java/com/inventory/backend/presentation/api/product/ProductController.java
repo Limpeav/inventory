@@ -80,6 +80,8 @@ public class ProductController {
                 .startDate(p.getStartDate())
                 .productType(p.getProductType())
                 .nameKh(p.getNameKh())
+                .brand(p.getBrand())
+                .condition(p.getCondition())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .build();

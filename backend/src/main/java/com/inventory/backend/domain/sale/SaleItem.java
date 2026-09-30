@@ -15,6 +15,8 @@ public class SaleItem {
     private double quantity;
     private BigDecimal unitPrice;
     private BigDecimal discount;  // per-line discount amount
+    private String serialNumber;  // machine serial number / S/N
+    private Integer warrantyMonths; // warranty in months (e.g. 3, 6, 12, 24)
 
     public SaleItem() {}
 
@@ -45,4 +47,10 @@ public class SaleItem {
 
     public BigDecimal getDiscount() { return discount; }
     public void setDiscount(BigDecimal discount) { this.discount = discount; }
+
+    public String getSerialNumber() { return serialNumber; }
+    public void setSerialNumber(String serialNumber) { this.serialNumber = serialNumber; }
+
+    public Integer getWarrantyMonths() { return warrantyMonths; }
+    public void setWarrantyMonths(Integer warrantyMonths) { this.warrantyMonths = warrantyMonths; }
 }
