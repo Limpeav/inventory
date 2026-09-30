@@ -87,6 +87,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="layout-container">
+      {/* Ambient glowing background orbs */}
+      <div className="ambient-glow-wrapper" aria-hidden="true">
+        <div className="ambient-orb ambient-orb-primary" />
+        <div className="ambient-orb ambient-orb-secondary" />
+        <div className="ambient-orb ambient-orb-accent" />
+      </div>
+
       {/* Mobile Backdrop */}
       {mobileNavOpen && (
         <div
@@ -289,13 +296,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <LanguageToggle />
             <ThemeToggle />
-            <button style={{
-              width: '36px', height: '36px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
-              background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
-              alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
-              transition: 'all 0.15s ease',
-            }} title={t('notifications')}>
+            <button
+              style={{
+                width: '36px', height: '36px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
+                background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
+                position: 'relative',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--primary)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-subtle)';
+                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
+                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+              }}
+              title={t('notifications')}
+            >
               <Bell size={16} />
+              <span
+                style={{
+                  position: 'absolute', top: 8, right: 8,
+                  width: 7, height: 7, borderRadius: '50%',
+                  backgroundColor: '#6366f1',
+                  boxShadow: '0 0 6px #6366f1',
+                }}
+              />
             </button>
 
             {/* Profile Dropdown */}
@@ -308,8 +337,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   background: 'linear-gradient(135deg, #6366f1, #818cf8)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '14px', fontWeight: '700', color: 'white', cursor: 'pointer',
-                  boxShadow: userMenuOpen ? '0 0 0 2px var(--brand-primary)' : 'none',
-                  transition: 'all 0.15s ease',
+                  boxShadow: userMenuOpen ? '0 0 0 3px rgba(99,102,241,0.35), 0 4px 12px rgba(99,102,241,0.3)' : '0 2px 8px rgba(99,102,241,0.2)',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                  transform: userMenuOpen ? 'scale(1.05)' : 'scale(1)',
                 }}
                 title={mounted && user?.fullName ? user.fullName : t('profile')}
               >
@@ -324,10 +354,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   />
                   <div style={{
                     position: 'absolute', right: 0, top: 'calc(100% + 8px)',
-                    width: '230px', borderRadius: '12px',
+                    width: '230px', borderRadius: '14px',
                     background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-                    padding: '8px', zIndex: 100, animation: 'fadeIn 0.15s ease',
+                    boxShadow: '0 12px 36px rgba(0,0,0,0.35)',
+                    padding: '8px', zIndex: 100,
+                    animation: 'springScaleUp 0.24s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transformOrigin: 'top right',
                   }}>
                     <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '6px' }}>
                       <p style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}>
@@ -385,7 +417,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 }
 
 function NavLink({ item, active, label, onClick }: {
-  item: { href: string; icon: React.ComponentType<{ size?: number }> };
+  item: { href: string; icon: React.ComponentType<{ size?: number; className?: string }> };
   active: boolean;
   label: string;
   onClick?: () => void;
@@ -396,17 +428,9 @@ function NavLink({ item, active, label, onClick }: {
     <Link
       href={item.href}
       onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '9px 12px', borderRadius: '10px', marginBottom: '2px',
-        background: active ? 'rgba(99,102,241,0.15)' : 'transparent',
-        border: active ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
-        color: active ? 'var(--primary-light)' : 'var(--text-muted)',
-        textDecoration: 'none', fontSize: '13px', fontWeight: active ? '600' : '400',
-        transition: 'all 0.15s ease',
-      }}
+      className={`sidebar-nav-item ${active ? 'active' : ''}`}
     >
-      <Icon size={16} />
+      <Icon size={16} className="nav-icon" />
       <span>{label}</span>
     </Link>
   );

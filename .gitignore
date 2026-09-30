@@ -33,3 +33,5 @@ backend/.env.local
 *.key
 *.env
 *.env.local
+!*.env.example
+!**/.env.example

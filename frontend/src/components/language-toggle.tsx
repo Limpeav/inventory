@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useLanguageStore, Language } from '@/store/language-store';
-import { Globe, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export function LanguageToggle() {
   const { language, setLanguage } = useLanguageStore();
@@ -57,13 +57,17 @@ export function LanguageToggle() {
           color: 'var(--text-primary)',
           fontSize: '13px',
           fontWeight: '600',
-          transition: 'all 0.15s ease',
+          transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease',
         }}
         onMouseEnter={e => {
-          (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--brand-primary, #6366f1)';
+          (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--primary)';
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.15)';
         }}
         onMouseLeave={e => {
           (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-subtle)';
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
         }}
         title="Switch language / ប្តូរភាសា"
       >
@@ -76,14 +80,15 @@ export function LanguageToggle() {
           position: 'absolute',
           right: 0,
           top: 'calc(100% + 8px)',
-          width: '180px',
-          borderRadius: '12px',
+          width: '185px',
+          borderRadius: '14px',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.35)',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.35)',
           padding: '6px',
           zIndex: 100,
-          animation: 'fadeIn 0.15s ease',
+          animation: 'springScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+          transformOrigin: 'top right',
         }}>
           <div style={{ padding: '6px 8px 4px 8px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
             Language / ភាសា

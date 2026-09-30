@@ -97,6 +97,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
   const color = meta?.color ?? '#6366f1';
   const bg = meta?.bg ?? 'rgba(99,102,241,0.12)';
   const border = meta?.border ?? 'rgba(99,102,241,0.3)';
+  const duration = toast.duration ?? 4500;
 
   return (
     <div
@@ -104,21 +105,33 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
       style={{
         pointerEvents: 'all', cursor: 'pointer',
         display: 'flex', alignItems: 'flex-start', gap: 12,
-        minWidth: 280, maxWidth: 360,
-        padding: '12px 14px',
-        borderRadius: 12,
-        background: 'var(--bg-card, #1a1d2e)',
+        minWidth: 290, maxWidth: 380,
+        padding: '14px 16px 16px 14px',
+        borderRadius: 14,
+        background: `linear-gradient(135deg, var(--bg-card, #1a1d2e), ${bg})`,
         border: `1px solid ${border}`,
-        boxShadow: `0 4px 24px rgba(0,0,0,0.35), 0 0 0 1px ${border}`,
-        backdropFilter: 'blur(12px)',
-        animation: 'slideInToast 0.3s cubic-bezier(.21,1.02,.73,1) forwards',
+        boxShadow: `0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px ${border}`,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        animation: 'slideInToast 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        position: 'relative',
+        overflow: 'hidden',
+        transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease',
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px) scale(1.01)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 12px 36px rgba(0,0,0,0.45), 0 0 12px ${color}40`;
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0) scale(1)';
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px ${border}`;
       }}
     >
-      {/* Accent bar */}
-      <div style={{ width: 3, borderRadius: 4, background: color, alignSelf: 'stretch', flexShrink: 0 }} />
+      {/* Accent pill */}
+      <div style={{ width: 3.5, borderRadius: 4, background: color, alignSelf: 'stretch', flexShrink: 0, boxShadow: `0 0 8px ${color}` }} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13, fontWeight: 700, color, marginBottom: 2, lineHeight: 1.3 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, color, marginBottom: 3, lineHeight: 1.3 }}>
           {toast.title}
         </p>
         <p style={{ fontSize: 12, color: 'var(--text-muted, #9ca3af)', lineHeight: 1.4 }}>
@@ -128,10 +141,33 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
 
       <button
         onClick={e => { e.stopPropagation(); onDismiss(); }}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted,#6b7280)', fontSize: 16, padding: '0 2px', lineHeight: 1, flexShrink: 0 }}
+        style={{
+          background: 'rgba(255, 255, 255, 0.06)', border: 'none', borderRadius: 6,
+          cursor: 'pointer', color: 'var(--text-muted,#6b7280)', fontSize: 14,
+          width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, transition: 'all 0.15s ease',
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+          (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239, 68, 68, 0.2)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted,#6b7280)';
+          (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.06)';
+        }}
       >
         ×
       </button>
+
+      {/* Progress countdown line */}
+      <div
+        style={{
+          position: 'absolute', bottom: 0, left: 0, height: 2.5,
+          background: color,
+          opacity: 0.8,
+          animation: `progressShrink ${duration}ms linear forwards`,
+        }}
+      />
     </div>
   );
 }

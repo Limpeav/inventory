@@ -155,37 +155,10 @@ function ResetPasswordContent() {
         <ThemeToggle />
       </div>
       {/* Background decorations */}
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          overflow: 'hidden',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: '-20%',
-            left: '-10%',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
-            borderRadius: '50%',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-20%',
-            right: '-10%',
-            width: '500px',
-            height: '500px',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%)',
-            borderRadius: '50%',
-          }}
-        />
+      <div className="ambient-glow-wrapper" aria-hidden="true">
+        <div className="ambient-orb ambient-orb-primary" />
+        <div className="ambient-orb ambient-orb-secondary" />
+        <div className="ambient-orb ambient-orb-accent" />
       </div>
 
       <div
