@@ -355,16 +355,4 @@ tbody td {
   to   { opacity: 0; transform: translateX(120%); }
 }
 
-.ws-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  display: inline-block; flex-shrink: 0;
-}
-.ws-dot.connected    { background: #10b981; box-shadow: 0 0 6px #10b98180; animation: wsPulse 2s ease-in-out infinite; }
-.ws-dot.disconnected { background: #ef4444; }
-.ws-dot.connecting   { background: #f59e0b; animation: wsPulse 1s ease-in-out infinite; }
-
-@keyframes wsPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
-}
 
