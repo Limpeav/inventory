@@ -57,6 +57,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/ws/**", "/ws/info").permitAll()  // WebSocket / SockJS handshake
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

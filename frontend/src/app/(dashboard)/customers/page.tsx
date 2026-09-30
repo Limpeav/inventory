@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { customerApi, Customer, CreateCustomerRequest } from '@/lib/customer-api';
+import { lookupApi, Province } from '@/lib/lookup-api';
 import { useTranslation } from '@/lib/i18n/translations';
 import {
   UserCheck, Plus, Pencil, Trash2, X, Search, AlertCircle,
@@ -32,9 +33,17 @@ function CustomerModal({
     status: customer?.status ?? 0,
     description: customer?.description ?? '',
     employeeCode: customer?.employeeCode ?? '',
+    vat: customer?.vat ?? '',
+    nameKh: customer?.nameKh ?? '',
+    addressKh: customer?.addressKh ?? '',
   });
+  const [provinces, setProvinces] = useState<Province[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    lookupApi.getProvinces().then(setProvinces).catch(() => {});
+  }, []);
 
   const handle = (k: keyof CreateCustomerRequest, v: unknown) =>
     setForm(f => ({ ...f, [k]: v }));
@@ -94,9 +103,13 @@ function CustomerModal({
                 <option value={1}>{t('inactive')}</option>
               </select>
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div>
               <label className="label">{t('customerNameRequired')}</label>
               <input className="input-field" required value={form.name} onChange={e => handle('name', e.target.value)} placeholder="Full name or company name" />
+            </div>
+            <div>
+              <label className="label">Khmer Name (ឈ្មោះជាភាសាខ្មែរ)</label>
+              <input className="input-field" value={form.nameKh} onChange={e => handle('nameKh', e.target.value)} placeholder="ឈ្មោះអតិថិជនជាភាសាខ្មែរ" />
             </div>
             <div>
               <label className="label">{t('phone')}</label>
@@ -112,11 +125,30 @@ function CustomerModal({
             </div>
             <div>
               <label className="label">{t('province')}</label>
-              <input className="input-field" value={form.province} onChange={e => handle('province', e.target.value)} placeholder="Province / City" />
+              <input
+                list="customer-provinces-list"
+                className="input-field"
+                value={form.province}
+                onChange={e => handle('province', e.target.value)}
+                placeholder="Select or enter province"
+              />
+              <datalist id="customer-provinces-list">
+                {provinces.map(p => (
+                  <option key={p.code} value={p.name} />
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label className="label">VAT Number</label>
+              <input className="input-field" value={form.vat} onChange={e => handle('vat', e.target.value)} placeholder="e.g. K001-901234567" />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <label className="label">{t('address')}</label>
               <input className="input-field" value={form.address} onChange={e => handle('address', e.target.value)} placeholder="Full address" />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="label">Khmer Address (អាសយដ្ឋានជាភាសាខ្មែរ)</label>
+              <input className="input-field" value={form.addressKh} onChange={e => handle('addressKh', e.target.value)} placeholder="អាសយដ្ឋានជាភាសាខ្មែរ" />
             </div>
             <div>
               <label className="label">{t('creditLimit')}</label>
@@ -263,7 +295,11 @@ export default function CustomersPage() {
                 <tr key={c.id}>
                   <td>
                     <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{c.name}</div>
-                    {c.customerId && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{c.customerId}</div>}
+                    {c.nameKh && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.nameKh}</div>}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                      {c.customerId && <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{c.customerId}</span>}
+                      {c.vat && <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: '#818cf8', padding: '1px 5px', borderRadius: 4 }}>VAT: {c.vat}</span>}
+                    </div>
                   </td>
                   <td>
                     {c.phone && <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}><Phone size={11} />{c.phone}</div>}

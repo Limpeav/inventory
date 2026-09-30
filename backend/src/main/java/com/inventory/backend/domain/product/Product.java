@@ -23,6 +23,8 @@ public class Product {
     private boolean hidden;
     private boolean deleted;
     private LocalDate startDate;
+    private String productType;   // maps dbo.TblProducts.proType
+    private String nameKh;        // maps dbo.TblProducts.pronamech
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -76,6 +78,12 @@ public class Product {
 
     public LocalDate getStartDate() { return startDate; }
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public String getProductType() { return productType; }
+    public void setProductType(String productType) { this.productType = productType; }
+
+    public String getNameKh() { return nameKh; }
+    public void setNameKh(String nameKh) { this.nameKh = nameKh; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

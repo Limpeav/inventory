@@ -8,6 +8,8 @@ import com.inventory.backend.domain.purchase.PurchaseItem;
 import com.inventory.backend.domain.purchase.PurchaseRepository;
 import com.inventory.backend.domain.supplier.Supplier;
 import com.inventory.backend.domain.supplier.SupplierRepository;
+import com.inventory.backend.infrastructure.websocket.WsEvent;
+import com.inventory.backend.infrastructure.websocket.WsNotificationService;
 import com.inventory.backend.presentation.dto.request.CreatePurchaseRequest;
 import com.inventory.backend.presentation.exception.ResourceAlreadyExistsException;
 import com.inventory.backend.presentation.exception.ResourceNotFoundException;
@@ -30,6 +32,7 @@ public class PurchaseService {
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
     private final StockService stockService;
+    private final WsNotificationService wsNotificationService;
 
     @Transactional(readOnly = true)
     public List<Purchase> findAll() { return purchaseRepository.findAll(); }
@@ -46,7 +49,7 @@ public class PurchaseService {
     }
 
     /**
-     * Create a purchase — increases stock quantities atomically.
+     * Create a purchase — increases stock quantities for received goods atomically.
      */
     public Purchase create(CreatePurchaseRequest request, UUID userId) {
         if (request.getReferenceCode() != null && !request.getReferenceCode().isBlank()
@@ -58,38 +61,115 @@ public class PurchaseService {
         purchase.setPurchaseDate(request.getPurchaseDate() != null ? request.getPurchaseDate() : LocalDate.now());
         purchase.setReferenceCode(request.getReferenceCode());
         purchase.setDeliveryDate(request.getDeliveryDate());
+        purchase.setPaymentDueDate(request.getPaymentDueDate());
         purchase.setSupplierId(request.getSupplierId());
         purchase.setUserId(userId);
         purchase.setExchangeRate(request.getExchangeRate() != null ? request.getExchangeRate() : BigDecimal.ONE);
         purchase.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
         purchase.setDiscount(request.getDiscount() != null ? request.getDiscount() : BigDecimal.ZERO);
         purchase.setNote(request.getNote());
-        purchase.setStatus("RECEIVED");
         purchase.setPurchaseUuid(UUID.randomUUID().toString());
 
+        String initialDeliveryStatus = request.getDeliveryStatus() != null && !request.getDeliveryStatus().isBlank()
+                ? request.getDeliveryStatus().toUpperCase() : "RECEIVED";
+
         List<PurchaseItem> items = new ArrayList<>();
+        boolean allReceived = true;
+        boolean anyReceived = false;
+
         for (CreatePurchaseRequest.PurchaseItemRequest ir : request.getItems()) {
             Product product = productRepository.findById(ir.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + ir.getProductId()));
 
-            // Add to stock
-            stockService.adjustStock(ir.getProductId(), ir.getQuantity());
+            double ordered = ir.getQuantity();
+            double received;
+            if (ir.getReceivedQuantity() != null) {
+                received = ir.getReceivedQuantity();
+            } else if ("ORDERED".equalsIgnoreCase(initialDeliveryStatus)) {
+                received = 0.0;
+            } else {
+                received = ordered;
+            }
+
+            if (received > 0) {
+                stockService.adjustStock(ir.getProductId(), received);
+                anyReceived = true;
+            }
+            if (received < ordered) {
+                allReceived = false;
+            }
 
             PurchaseItem item = new PurchaseItem();
             item.setProductId(ir.getProductId());
             item.setProductName(product.getName());
-            item.setQuantity(ir.getQuantity());
+            item.setOrderedQuantity(ordered);
+            item.setReceivedQuantity(received);
             item.setUnitCost(ir.getUnitCost());
             item.setDiscount(ir.getDiscount() != null ? ir.getDiscount() : BigDecimal.ZERO);
             items.add(item);
         }
+
+        String finalStatus = allReceived ? "RECEIVED" : (anyReceived ? "PARTIALLY_RECEIVED" : "ORDERED");
+        purchase.setDeliveryStatus(finalStatus);
+        purchase.setStatus(finalStatus);
+        if (anyReceived) {
+            purchase.setActualDeliveryDate(request.getDeliveryDate() != null ? request.getDeliveryDate() : LocalDate.now());
+        }
+
         purchase.setItems(items);
         purchase.setTotalAmount(purchase.calculateTotal());
-        return purchaseRepository.save(purchase);
+        Purchase saved = purchaseRepository.save(purchase);
+        wsNotificationService.broadcast(WsEvent.of(
+                WsEvent.Type.PURCHASE_CREATED,
+                saved.getId().toString(),
+                saved.getReferenceCode() != null ? saved.getReferenceCode() : saved.getId().toString(),
+                null, null));
+        return saved;
     }
 
     /**
-     * Cancel purchase — restores (deducts) stock quantities.
+     * Receive goods against a purchase order — increases inventory for received items.
+     */
+    public Purchase receiveItems(UUID id, com.inventory.backend.presentation.dto.request.ReceivePurchaseItemsRequest request) {
+        Purchase purchase = findById(id);
+        if ("CANCELLED".equals(purchase.getStatus())) {
+            throw new IllegalStateException("Cannot receive items for a cancelled purchase");
+        }
+
+        for (com.inventory.backend.presentation.dto.request.ReceivePurchaseItemsRequest.ReceiveItemEntry entry : request.getItems()) {
+            if (entry.getQuantityReceived() <= 0) continue;
+
+            PurchaseItem item = purchase.getItems().stream()
+                    .filter(i -> (entry.getItemId() != null && entry.getItemId().equals(i.getId()))
+                            || (entry.getProductId() != null && entry.getProductId().equals(i.getProductId())))
+                    .findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("Item not found in purchase: "
+                            + (entry.getItemId() != null ? entry.getItemId() : entry.getProductId())));
+
+            double newReceived = item.getReceivedQuantity() + entry.getQuantityReceived();
+            item.setReceivedQuantity(newReceived);
+            stockService.adjustStock(item.getProductId(), entry.getQuantityReceived());
+        }
+
+        boolean allReceived = purchase.getItems().stream().allMatch(PurchaseItem::isFullyReceived);
+        boolean anyReceived = purchase.getItems().stream().anyMatch(i -> i.getReceivedQuantity() > 0);
+        String finalStatus = allReceived ? "RECEIVED" : (anyReceived ? "PARTIALLY_RECEIVED" : "ORDERED");
+
+        purchase.setDeliveryStatus(finalStatus);
+        purchase.setStatus(finalStatus);
+        purchase.setActualDeliveryDate(request.getDeliveryDate() != null ? request.getDeliveryDate() : LocalDate.now());
+
+        Purchase saved = purchaseRepository.save(purchase);
+        wsNotificationService.broadcast(WsEvent.of(
+                WsEvent.Type.PURCHASE_RECEIVED,
+                saved.getId().toString(),
+                saved.getReferenceCode() != null ? saved.getReferenceCode() : saved.getId().toString(),
+                null, null));
+        return saved;
+    }
+
+    /**
+     * Cancel purchase — restores (deducts) actually received stock quantities.
      */
     public Purchase cancel(UUID id) {
         Purchase purchase = findById(id);
@@ -97,10 +177,19 @@ public class PurchaseService {
             throw new IllegalStateException("Purchase is already cancelled");
         }
         for (PurchaseItem item : purchase.getItems()) {
-            stockService.adjustStock(item.getProductId(), -item.getQuantity());
+            if (item.getReceivedQuantity() > 0) {
+                stockService.adjustStock(item.getProductId(), -item.getReceivedQuantity());
+            }
         }
         purchase.setStatus("CANCELLED");
-        return purchaseRepository.save(purchase);
+        purchase.setDeliveryStatus("CANCELLED");
+        Purchase saved = purchaseRepository.save(purchase);
+        wsNotificationService.broadcast(WsEvent.of(
+                WsEvent.Type.PURCHASE_CANCELLED,
+                saved.getId().toString(),
+                saved.getReferenceCode() != null ? saved.getReferenceCode() : saved.getId().toString(),
+                null, null));
+        return saved;
     }
 
     @Transactional(readOnly = true)

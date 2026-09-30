@@ -5,6 +5,10 @@ export interface PurchaseItem {
   productId: string;
   productName?: string;
   quantity: number;
+  orderedQuantity?: number;
+  receivedQuantity?: number;
+  pendingQuantity?: number;
+  fullyReceived?: boolean;
   unitCost: number;
   discount?: number;
   subtotal?: number;
@@ -15,6 +19,9 @@ export interface Purchase {
   referenceCode?: string;
   purchaseDate: string;
   deliveryDate?: string;
+  actualDeliveryDate?: string;
+  deliveryStatus?: string;
+  paymentDueDate?: string;
   supplierId?: string;
   supplierName?: string;
   exchangeRate?: number;
@@ -32,12 +39,15 @@ export interface CreatePurchaseRequest {
   referenceCode?: string;
   purchaseDate: string;
   deliveryDate?: string;
+  actualDeliveryDate?: string;
+  deliveryStatus?: string;
+  paymentDueDate?: string;
   supplierId?: string;
   exchangeRate?: number;
   currency?: string;
   discount?: number;
   note?: string;
-  items: { productId: string; quantity: number; unitCost: number; discount?: number }[];
+  items: { productId: string; quantity: number; receivedQuantity?: number; unitCost: number; discount?: number }[];
 }
 
 export const purchaseApi = {
@@ -46,4 +56,6 @@ export const purchaseApi = {
   getById: (id: string) => api.get<{ data: Purchase }>(`/purchases/${id}`).then(r => r.data.data),
   create: (data: CreatePurchaseRequest) => api.post<{ data: Purchase }>('/purchases', data).then(r => r.data.data),
   cancel: (id: string) => api.patch<{ data: Purchase }>(`/purchases/${id}/cancel`).then(r => r.data.data),
+  receive: (id: string, items: { itemId?: string; productId?: string; quantityReceived: number }[], deliveryDate?: string) =>
+    api.post<{ data: Purchase }>(`/purchases/${id}/receive`, { items, deliveryDate }).then(r => r.data.data),
 };

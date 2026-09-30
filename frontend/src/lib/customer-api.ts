@@ -15,6 +15,9 @@ export interface Customer {
   statusLabel?: string;
   description?: string;
   employeeCode?: string;
+  vat?: string;
+  nameKh?: string;
+  addressKh?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -32,6 +35,9 @@ export interface CreateCustomerRequest {
   status?: number;
   description?: string;
   employeeCode?: string;
+  vat?: string;
+  nameKh?: string;
+  addressKh?: string;
 }
 
 export const customerApi = {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import { returnApi, SaleReturn, CreateSaleReturnRequest } from '@/lib/return-api';
 import { saleApi, Sale } from '@/lib/sale-api';
 import { useTranslation } from '@/lib/i18n/translations';
@@ -202,7 +202,7 @@ export default function ReturnsPage() {
                   const isExpanded = expandedId === r.id;
 
                   return (
-                    <div key={r.id} style={{ display: 'contents' }}>
+                    <Fragment key={r.id}>
                       <tr
                         onClick={() => setExpandedId(isExpanded ? null : r.id)}
                         style={{
@@ -285,7 +285,7 @@ export default function ReturnsPage() {
                           </td>
                         </tr>
                       )}
-                    </div>
+                    </Fragment>
                   );
                 })
               )}

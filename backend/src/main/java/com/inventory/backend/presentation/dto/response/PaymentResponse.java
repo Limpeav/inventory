@@ -14,7 +14,10 @@ public class PaymentResponse {
     private UUID id;
     private String referenceType;
     private UUID referenceId;
+    private String referenceCode;
     private BigDecimal amount;
+    private BigDecimal totalAmount;
+    private BigDecimal remainingBalance;
     private String paymentMethod;
     private LocalDate paymentDate;
     private String currency;

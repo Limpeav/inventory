@@ -43,4 +43,13 @@ public class CreateCustomerRequest {
 
     @Size(max = 10)
     private String employeeCode;
+
+    @Size(max = 20)
+    private String vat;
+
+    @Size(max = 500)
+    private String nameKh;
+
+    @Size(max = 500)
+    private String addressKh;
 }

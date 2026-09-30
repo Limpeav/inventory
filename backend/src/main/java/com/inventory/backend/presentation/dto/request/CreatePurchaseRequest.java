@@ -20,6 +20,8 @@ public class CreatePurchaseRequest {
     private LocalDate purchaseDate;
 
     private LocalDate deliveryDate;
+    private String deliveryStatus; // e.g. "ORDERED" or "RECEIVED"
+    private LocalDate paymentDueDate;
     private UUID supplierId;
     private BigDecimal exchangeRate = BigDecimal.ONE;
     private String currency = "USD";
@@ -37,6 +39,8 @@ public class CreatePurchaseRequest {
 
         @Positive(message = "Quantity must be positive")
         private double quantity;
+
+        private Double receivedQuantity;
 
         @NotNull
         private BigDecimal unitCost;

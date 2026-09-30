@@ -78,6 +78,8 @@ public class ProductController {
                 .hidden(p.isHidden())
                 .deleted(p.isDeleted())
                 .startDate(p.getStartDate())
+                .productType(p.getProductType())
+                .nameKh(p.getNameKh())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .build();

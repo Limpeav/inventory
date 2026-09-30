@@ -18,11 +18,13 @@ public class SaleResponse {
     private UUID customerId;
     private String customerName;
     private UUID employeeId;
+    private String employeeName;   // resolved name of the salesperson
     private BigDecimal exchangeRate;
     private String currency;
     private BigDecimal discount;
     private BigDecimal totalAmount;
     private String status;
+    private boolean paid;          // true = payment recorded (mirrors salPay)
     private String note;
     private List<SaleItemResponse> items;
     private LocalDateTime createdAt;

@@ -100,6 +100,8 @@ public class ProductService {
         product.setReorderLevel(request.getReorderLevel());
         product.setHidden(request.isHidden());
         product.setStartDate(request.getStartDate());
+        product.setProductType(request.getProductType());
+        product.setNameKh(request.getNameKh());
         product.setDeleted(false);
     }
 

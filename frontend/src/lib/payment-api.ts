@@ -4,7 +4,10 @@ export interface Payment {
   id: string;
   referenceType: string;
   referenceId: string;
+  referenceCode?: string;
   amount: number;
+  totalAmount?: number;
+  remainingBalance?: number;
   paymentMethod: string;
   paymentDate: string;
   currency: string;

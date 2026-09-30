@@ -13,7 +13,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "payments")
 @EntityListeners(AuditingEntityListener.class)
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PaymentEntity {
 
     @Id
@@ -22,7 +26,7 @@ public class PaymentEntity {
     private UUID id;
 
     @Column(name = "reference_type", length = 20, nullable = false)
-    private String referenceType;   // SALE or PURCHASE
+    private String referenceType; // SALE or PURCHASE
 
     @Column(name = "reference_id", nullable = false)
     private UUID referenceId;

@@ -34,6 +34,8 @@ function ProductModal({
     reorderLevel: product?.reorderLevel ?? 0,
     hidden: product?.hidden ?? false,
     startDate: product?.startDate ?? '',
+    productType: product?.productType ?? '',
+    nameKh: product?.nameKh ?? '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +55,8 @@ function ProductModal({
         cost: form.cost ? Number(form.cost) : undefined,
         price: form.price ? Number(form.price) : undefined,
         startDate: form.startDate || undefined,
+        productType: form.productType || undefined,
+        nameKh: form.nameKh || undefined,
       };
       if (product) {
         await productApi.update(product.id, payload);
@@ -89,9 +93,14 @@ function ProductModal({
         <form onSubmit={submit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             {/* Name */}
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div>
               <label className="label">{t('productNameRequired')}</label>
               <input className="input-field" required value={form.name} onChange={e => handle('name', e.target.value)} placeholder="e.g. Coca Cola 330ml" />
+            </div>
+            {/* Khmer / Alt Name */}
+            <div>
+              <label className="label">Khmer / Alt Name (ឈ្មោះជាភាសាខ្មែរ)</label>
+              <input className="input-field" value={form.nameKh} onChange={e => handle('nameKh', e.target.value)} placeholder="ឈ្មោះផលិតផលជាភាសាខ្មែរ" />
             </div>
             {/* Barcode */}
             <div>
@@ -115,6 +124,11 @@ function ProductModal({
             <div>
               <label className="label">{t('packageUnit')}</label>
               <input className="input-field" value={form.packageUnit} onChange={e => handle('packageUnit', e.target.value)} placeholder="e.g. Box, Piece, Kg" />
+            </div>
+            {/* Product Type */}
+            <div>
+              <label className="label">Product Type</label>
+              <input className="input-field" value={form.productType} onChange={e => handle('productType', e.target.value)} placeholder="e.g. Standard, Raw Material" />
             </div>
             {/* Cost */}
             <div>
@@ -285,7 +299,11 @@ export default function ProductsPage() {
                 <tr key={p.id}>
                   <td>
                     <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{p.name}</div>
-                    {p.model && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.model}</div>}
+                    {p.nameKh && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.nameKh}</div>}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                      {p.model && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.model}</span>}
+                      {p.productType && <span style={{ fontSize: 10, background: 'rgba(99,102,241,0.1)', color: '#818cf8', padding: '1px 5px', borderRadius: 4 }}>{p.productType}</span>}
+                    </div>
                   </td>
                   <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{p.barcode || '—'}</td>
                   <td>

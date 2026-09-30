@@ -15,6 +15,8 @@ export interface Product {
   hidden: boolean;
   deleted: boolean;
   startDate?: string;
+  productType?: string;
+  nameKh?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -31,6 +33,8 @@ export interface CreateProductRequest {
   reorderLevel?: number;
   hidden?: boolean;
   startDate?: string;
+  productType?: string;
+  nameKh?: string;
 }
 
 export const productApi = {

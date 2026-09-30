@@ -3,11 +3,15 @@ package com.inventory.backend.application.sale;
 import com.inventory.backend.application.stock.StockService;
 import com.inventory.backend.domain.customer.Customer;
 import com.inventory.backend.domain.customer.CustomerRepository;
+import com.inventory.backend.domain.employee.Employee;
+import com.inventory.backend.domain.employee.EmployeeRepository;
 import com.inventory.backend.domain.product.Product;
 import com.inventory.backend.domain.product.ProductRepository;
 import com.inventory.backend.domain.sale.Sale;
 import com.inventory.backend.domain.sale.SaleItem;
 import com.inventory.backend.domain.sale.SaleRepository;
+import com.inventory.backend.infrastructure.websocket.WsEvent;
+import com.inventory.backend.infrastructure.websocket.WsNotificationService;
 import com.inventory.backend.presentation.dto.request.CreateSaleRequest;
 import com.inventory.backend.presentation.exception.ResourceAlreadyExistsException;
 import com.inventory.backend.presentation.exception.ResourceNotFoundException;
@@ -29,7 +33,9 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
+    private final EmployeeRepository employeeRepository;
     private final StockService stockService;
+    private final WsNotificationService wsNotificationService;
 
     @Transactional(readOnly = true)
     public List<Sale> findAll() { return saleRepository.findAll(); }
@@ -85,7 +91,13 @@ public class SaleService {
         }
         sale.setItems(items);
         sale.setTotalAmount(sale.calculateTotal());
-        return saleRepository.save(sale);
+        Sale saved = saleRepository.save(sale);
+        wsNotificationService.broadcast(WsEvent.of(
+                WsEvent.Type.SALE_CREATED,
+                saved.getId().toString(),
+                saved.getInvoiceCode() != null ? saved.getInvoiceCode() : saved.getId().toString(),
+                null, null));
+        return saved;
     }
 
     /**
@@ -101,12 +113,24 @@ public class SaleService {
             stockService.adjustStock(item.getProductId(), item.getQuantity());
         }
         sale.setStatus("CANCELLED");
-        return saleRepository.save(sale);
+        Sale saved = saleRepository.save(sale);
+        wsNotificationService.broadcast(WsEvent.of(
+                WsEvent.Type.SALE_CANCELLED,
+                saved.getId().toString(),
+                saved.getInvoiceCode() != null ? saved.getInvoiceCode() : saved.getId().toString(),
+                null, null));
+        return saved;
     }
 
     @Transactional(readOnly = true)
     public String resolveCustomerName(UUID customerId) {
         if (customerId == null) return null;
         return customerRepository.findById(customerId).map(Customer::getName).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public String resolveEmployeeName(UUID employeeId) {
+        if (employeeId == null) return null;
+        return employeeRepository.findById(employeeId).map(Employee::getName).orElse(null);
     }
 }

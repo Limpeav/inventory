@@ -16,7 +16,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "sales")
 @EntityListeners(AuditingEntityListener.class)
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SaleEntity {
 
     @Id
@@ -64,6 +68,10 @@ public class SaleEntity {
 
     @Column(name = "sale_uuid", length = 100)
     private String saleUuid;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean paid = false;
 
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default

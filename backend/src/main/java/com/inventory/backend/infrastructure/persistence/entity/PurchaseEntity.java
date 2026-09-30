@@ -16,7 +16,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "purchases")
 @EntityListeners(AuditingEntityListener.class)
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PurchaseEntity {
 
     @Id
@@ -32,6 +36,16 @@ public class PurchaseEntity {
 
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
+
+    @Column(name = "actual_delivery_date")
+    private LocalDate actualDeliveryDate;
+
+    @Column(name = "delivery_status", length = 30)
+    @Builder.Default
+    private String deliveryStatus = "RECEIVED";
+
+    @Column(name = "payment_due_date")
+    private LocalDate paymentDueDate;
 
     @Column(name = "supplier_id")
     private UUID supplierId;

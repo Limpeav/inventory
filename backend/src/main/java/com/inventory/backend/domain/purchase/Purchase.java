@@ -15,7 +15,10 @@ public class Purchase {
     private UUID id;
     private String referenceCode;       // business PO number
     private LocalDate purchaseDate;
-    private LocalDate deliveryDate;
+    private LocalDate deliveryDate;     // expected delivery date (purDeliveryDateExpected)
+    private LocalDate actualDeliveryDate; // actual delivery date (purDeliveryDate)
+    private String deliveryStatus;      // ORDERED, PARTIALLY_RECEIVED, RECEIVED (purDeliveryStatus)
+    private LocalDate paymentDueDate;   // payment due date (purDateNeedtoPay)
     private UUID supplierId;
     private UUID userId;
     private BigDecimal exchangeRate;
@@ -50,6 +53,15 @@ public class Purchase {
 
     public LocalDate getDeliveryDate() { return deliveryDate; }
     public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
+
+    public LocalDate getActualDeliveryDate() { return actualDeliveryDate; }
+    public void setActualDeliveryDate(LocalDate actualDeliveryDate) { this.actualDeliveryDate = actualDeliveryDate; }
+
+    public String getDeliveryStatus() { return deliveryStatus; }
+    public void setDeliveryStatus(String deliveryStatus) { this.deliveryStatus = deliveryStatus; }
+
+    public LocalDate getPaymentDueDate() { return paymentDueDate; }
+    public void setPaymentDueDate(LocalDate paymentDueDate) { this.paymentDueDate = paymentDueDate; }
 
     public UUID getSupplierId() { return supplierId; }
     public void setSupplierId(UUID supplierId) { this.supplierId = supplierId; }

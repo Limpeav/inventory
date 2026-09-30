@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   LayoutDashboard, Users, Shield, Package, ChevronRight,
   LogOut, Settings, Bell, ShoppingCart, Truck, UserCheck,
-  Tag, BarChart3, Warehouse, Receipt, RotateCcw, CreditCard
+  Tag, BarChart3, Warehouse, Receipt, RotateCcw, CreditCard, DollarSign
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
@@ -14,6 +14,7 @@ import Cookies from 'js-cookie';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageToggle } from '@/components/language-toggle';
 import { useTranslation, TranslationKey } from '@/lib/i18n/translations';
+import RealtimeProvider from '@/components/RealtimeProvider';
 
 interface NavItemDef {
   href: string;
@@ -35,6 +36,7 @@ const navItemDefs: NavItemDef[] = [
   { href: '/purchases',            translationKey: 'navPurchases', label: 'Purchases',   icon: ShoppingCart,    section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
   { href: '/returns',              translationKey: 'navReturns', label: 'Returns',     icon: RotateCcw,       section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
   { href: '/payments',             translationKey: 'navPayments', label: 'Payments',    icon: CreditCard,      section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
+  { href: '/expenses',             translationKey: 'navExpenses', label: 'Expenses',    icon: DollarSign,      section: 'transactions', roles: ['ADMIN', 'MANAGER'] },
   { href: '/settings/users',       translationKey: 'navUsers', label: 'Users',       icon: Shield,          section: 'settings',  roles: ['ADMIN', 'MANAGER'] },
   { href: '/settings/roles',       translationKey: 'navRoles', label: 'Roles & Access', icon: Settings,     section: 'settings',  roles: ['ADMIN'] },
 ];
@@ -356,7 +358,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Page content */}
         <div style={{ flex: 1, padding: '28px', overflowY: 'auto' }}>
-          {children}
+          <RealtimeProvider>
+            {children}
+          </RealtimeProvider>
         </div>
       </main>
     </div>

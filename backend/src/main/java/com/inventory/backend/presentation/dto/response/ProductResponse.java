@@ -25,6 +25,8 @@ public class ProductResponse {
     private boolean hidden;
     private boolean deleted;
     private LocalDate startDate;
+    private String productType;
+    private String nameKh;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

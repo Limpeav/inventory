@@ -23,6 +23,7 @@ public class Sale {
     private BigDecimal discount;       // overall discount amount
     private BigDecimal totalAmount;
     private String status;             // PENDING, COMPLETED, CANCELLED, RETURNED
+    private boolean paid;              // mirrors salPay — true when payment is recorded
     private String note;
     private String saleUuid;           // audit UUID from SmartInventory
     private List<SaleItem> items = new ArrayList<>();
@@ -72,6 +73,9 @@ public class Sale {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }

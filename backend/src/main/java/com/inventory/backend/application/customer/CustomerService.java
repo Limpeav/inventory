@@ -75,5 +75,8 @@ public class CustomerService {
         customer.setStatus(request.getStatus());
         customer.setDescription(request.getDescription());
         customer.setEmployeeCode(request.getEmployeeCode());
+        customer.setVat(request.getVat());
+        customer.setNameKh(request.getNameKh());
+        customer.setAddressKh(request.getAddressKh());
     }
 }

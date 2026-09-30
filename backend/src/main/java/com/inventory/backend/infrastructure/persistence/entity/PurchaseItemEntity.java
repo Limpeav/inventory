@@ -8,7 +8,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "purchase_items")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PurchaseItemEntity {
 
     @Id
@@ -28,6 +32,14 @@ public class PurchaseItemEntity {
 
     @Column(nullable = false)
     private double quantity;
+
+    @Column(name = "ordered_quantity")
+    @Builder.Default
+    private double orderedQuantity = 0;
+
+    @Column(name = "received_quantity")
+    @Builder.Default
+    private double receivedQuantity = 0;
 
     @Column(name = "unit_cost", precision = 15, scale = 4, nullable = false)
     private BigDecimal unitCost;

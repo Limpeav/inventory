@@ -56,12 +56,21 @@ export default function PaymentsPage() {
 
   const handleTransactionChange = (id: string) => {
     setSelectedRefId(id);
+    const existingPayments = payments.filter(p => p.referenceId === id);
+    const alreadyPaid = existingPayments.reduce((s, p) => s + (p.amount || 0), 0);
+
     if (refType === 'SALE') {
       const s = sales.find(item => item.id === id);
-      if (s?.totalAmount) setAmount(s.totalAmount);
+      if (s?.totalAmount != null) {
+        const remaining = Math.max(0, s.totalAmount - alreadyPaid);
+        setAmount(remaining > 0 ? remaining : s.totalAmount);
+      }
     } else {
       const p = purchases.find(item => item.id === id);
-      if (p?.totalAmount) setAmount(p.totalAmount);
+      if (p?.totalAmount != null) {
+        const remaining = Math.max(0, p.totalAmount - alreadyPaid);
+        setAmount(remaining > 0 ? remaining : p.totalAmount);
+      }
     }
   };
 
@@ -296,7 +305,14 @@ export default function PaymentsPage() {
                         </span>
                       </td>
                       <td style={{ padding: '14px 18px', color: 'var(--text-secondary)' }}>
-                        {saleRef?.invoiceCode || purchaseRef?.referenceCode || p.referenceId.slice(0, 8)}
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {p.referenceCode || saleRef?.invoiceCode || purchaseRef?.referenceCode || p.referenceId.slice(0, 8)}
+                        </div>
+                        {p.remainingBalance != null && p.totalAmount != null && p.totalAmount > 0 && (
+                          <div style={{ fontSize: '11px', color: p.remainingBalance <= 0 ? '#10b981' : '#f59e0b' }}>
+                            {p.remainingBalance <= 0 ? 'Fully Settled' : `Bal: ${formatCurrency(p.remainingBalance)}`}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '14px 18px' }}>
                         <span style={{
@@ -441,6 +457,20 @@ export default function PaymentsPage() {
                     ))
                   )}
                 </select>
+                {selectedRefId && (
+                  <div style={{
+                    marginTop: '8px', padding: '10px 14px', borderRadius: '8px',
+                    background: 'var(--bg-base)', border: '1px solid var(--border-subtle)',
+                    display: 'flex', justifyContent: 'space-between', fontSize: '12px',
+                  }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      Invoice Total: <strong style={{ color: 'var(--text-primary)' }}>{formatCurrency(refType === 'SALE' ? sales.find(s => s.id === selectedRefId)?.totalAmount : purchases.find(p => p.id === selectedRefId)?.totalAmount)}</strong>
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      Outstanding: <strong style={{ color: '#f59e0b' }}>{formatCurrency(amount !== '' ? Number(amount) : 0)}</strong>
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Amount and Method */}

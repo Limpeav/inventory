@@ -22,6 +22,8 @@ export interface Sale {
   discount?: number;
   totalAmount?: number;
   status: string;
+  paid?: boolean;
+  employeeName?: string;
   note?: string;
   items?: SaleItem[];
   createdAt?: string;

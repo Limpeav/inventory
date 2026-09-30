@@ -66,21 +66,49 @@ public class PurchaseController {
         return ResponseEntity.ok(ApiResponse.success("Purchase cancelled", toResponse(purchaseService.cancel(id))));
     }
 
+    @PostMapping("/{id}/receive")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<ApiResponse<PurchaseResponse>> receiveItems(
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody com.inventory.backend.presentation.dto.request.ReceivePurchaseItemsRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Goods received successfully", toResponse(purchaseService.receiveItems(id, request))));
+    }
+
     private PurchaseResponse toResponse(Purchase p) {
         List<PurchaseResponse.PurchaseItemResponse> items = p.getItems() == null ? List.of() :
                 p.getItems().stream().map(i -> PurchaseResponse.PurchaseItemResponse.builder()
-                        .id(i.getId()).productId(i.getProductId()).productName(i.getProductName())
-                        .quantity(i.getQuantity()).unitCost(i.getUnitCost()).discount(i.getDiscount())
+                        .id(i.getId())
+                        .productId(i.getProductId())
+                        .productName(i.getProductName())
+                        .quantity(i.getQuantity())
+                        .orderedQuantity(i.getOrderedQuantity())
+                        .receivedQuantity(i.getReceivedQuantity())
+                        .pendingQuantity(i.getPendingQuantity())
+                        .fullyReceived(i.isFullyReceived())
+                        .unitCost(i.getUnitCost())
+                        .discount(i.getDiscount())
                         .subtotal(i.getSubtotal())
                         .build()).collect(Collectors.toList());
 
         return PurchaseResponse.builder()
-                .id(p.getId()).referenceCode(p.getReferenceCode()).purchaseDate(p.getPurchaseDate())
-                .deliveryDate(p.getDeliveryDate()).supplierId(p.getSupplierId())
+                .id(p.getId())
+                .referenceCode(p.getReferenceCode())
+                .purchaseDate(p.getPurchaseDate())
+                .deliveryDate(p.getDeliveryDate())
+                .actualDeliveryDate(p.getActualDeliveryDate())
+                .deliveryStatus(p.getDeliveryStatus())
+                .paymentDueDate(p.getPaymentDueDate())
+                .supplierId(p.getSupplierId())
                 .supplierName(purchaseService.resolveSupplierName(p.getSupplierId()))
-                .exchangeRate(p.getExchangeRate()).currency(p.getCurrency())
-                .discount(p.getDiscount()).totalAmount(p.getTotalAmount()).status(p.getStatus())
-                .note(p.getNote()).items(items).createdAt(p.getCreatedAt()).updatedAt(p.getUpdatedAt())
+                .exchangeRate(p.getExchangeRate())
+                .currency(p.getCurrency())
+                .discount(p.getDiscount())
+                .totalAmount(p.getTotalAmount())
+                .status(p.getStatus())
+                .note(p.getNote())
+                .items(items)
+                .createdAt(p.getCreatedAt())
+                .updatedAt(p.getUpdatedAt())
                 .build();
     }
 }

@@ -66,6 +66,7 @@ public class CustomerController {
                 .creditLimit(c.getCreditLimit()).creditDays(c.getCreditDays())
                 .status(c.getStatus()).statusLabel(c.getStatus() == 0 ? "Active" : "Inactive")
                 .description(c.getDescription()).employeeCode(c.getEmployeeCode())
+                .vat(c.getVat()).nameKh(c.getNameKh()).addressKh(c.getAddressKh())
                 .createdAt(c.getCreatedAt()).updatedAt(c.getUpdatedAt())
                 .build();
     }

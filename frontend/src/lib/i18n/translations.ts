@@ -25,6 +25,7 @@ export const translations = {
     navPurchases: 'Purchases',
     navReturns: 'Returns',
     navPayments: 'Payments',
+    navExpenses: 'Expenses',
     navUsers: 'Users',
     navRoles: 'Roles & Access',
 
@@ -497,6 +498,7 @@ export const translations = {
     navPurchases: 'ការទិញចូល',
     navReturns: 'ការបង្វិលសង',
     navPayments: 'ការទូទាត់',
+    navExpenses: 'ការចំណាយ',
     navUsers: 'អ្នកប្រើប្រាស់',
     navRoles: 'តួនាទី និងសិទ្ធិ',
 

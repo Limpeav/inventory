@@ -77,8 +77,10 @@ public class SaleController {
         return SaleResponse.builder()
                 .id(s.getId()).invoiceCode(s.getInvoiceCode()).saleDate(s.getSaleDate())
                 .customerId(s.getCustomerId()).customerName(saleService.resolveCustomerName(s.getCustomerId()))
-                .employeeId(s.getEmployeeId()).exchangeRate(s.getExchangeRate()).currency(s.getCurrency())
-                .discount(s.getDiscount()).totalAmount(s.getTotalAmount()).status(s.getStatus())
+                .employeeId(s.getEmployeeId()).employeeName(saleService.resolveEmployeeName(s.getEmployeeId()))
+                .exchangeRate(s.getExchangeRate()).currency(s.getCurrency())
+                .discount(s.getDiscount()).totalAmount(s.getTotalAmount())
+                .status(s.getStatus()).paid(s.isPaid())
                 .note(s.getNote()).items(items).createdAt(s.getCreatedAt()).updatedAt(s.getUpdatedAt())
                 .build();
     }

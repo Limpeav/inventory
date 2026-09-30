@@ -13,7 +13,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "customers")
 @EntityListeners(AuditingEntityListener.class)
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CustomerEntity {
 
     @Id
@@ -59,6 +63,15 @@ public class CustomerEntity {
 
     @Column(name = "employee_code", length = 10)
     private String employeeCode;
+
+    @Column(length = 20)
+    private String vat;
+
+    @Column(name = "name_kh", length = 500)
+    private String nameKh;
+
+    @Column(name = "address_kh", length = 500)
+    private String addressKh;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

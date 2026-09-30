@@ -38,4 +38,10 @@ public class CreateProductRequest {
     private double reorderLevel;
     private boolean hidden;
     private LocalDate startDate;
+
+    @Size(max = 50)
+    private String productType;
+
+    @Size(max = 50)
+    private String nameKh;
 }

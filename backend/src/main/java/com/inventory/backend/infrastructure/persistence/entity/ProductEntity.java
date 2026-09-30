@@ -14,7 +14,11 @@ import java.util.UUID;
 @Entity
 @Table(name = "products")
 @EntityListeners(AuditingEntityListener.class)
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProductEntity {
 
     @Id
@@ -60,6 +64,12 @@ public class ProductEntity {
 
     @Column(name = "start_date")
     private LocalDate startDate;
+
+    @Column(name = "product_type", length = 50)
+    private String productType;
+
+    @Column(name = "name_kh", length = 500)
+    private String nameKh;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)

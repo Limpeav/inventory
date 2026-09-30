@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { saleApi, Sale } from '@/lib/sale-api';
 import { customerApi, Customer } from '@/lib/customer-api';
 import { productApi, Product } from '@/lib/product-api';
+import { lookupApi, Currency } from '@/lib/lookup-api';
 import { useTranslation } from '@/lib/i18n/translations';
 import {
   Receipt, Plus, X, AlertCircle, Search, RefreshCw,
@@ -29,9 +30,14 @@ function CreateSaleModal({
   const [currency, setCurrency] = useState('USD');
   const [discount, setDiscount] = useState('0');
   const [note, setNote] = useState('');
+  const [availableCurrencies, setAvailableCurrencies] = useState<Currency[]>([]);
   const [lines, setLines] = useState([{ productId: '', quantity: 1, unitPrice: 0, discount: 0 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    lookupApi.getCurrencies().then(setAvailableCurrencies).catch(() => {});
+  }, []);
 
   const addLine = () => setLines(l => [...l, { productId: '', quantity: 1, unitPrice: 0, discount: 0 }]);
   const removeLine = (i: number) => setLines(l => l.filter((_, idx) => idx !== i));
@@ -90,8 +96,16 @@ function CreateSaleModal({
             </div>
             <div><label className="label">{t('currency')}</label>
               <select className="input-field" value={currency} onChange={e => setCurrency(e.target.value)}>
-                <option value="USD">USD ($)</option>
-                <option value="KHR">KHR (៛)</option>
+                {availableCurrencies.length > 0 ? (
+                  availableCurrencies.map(c => (
+                    <option key={c.code} value={c.name}>{c.name}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="USD">USD ($)</option>
+                    <option value="KHR">KHR (៛)</option>
+                  </>
+                )}
               </select>
             </div>
             <div><label className="label">{t('overallDiscount')}</label><input className="input-field" type="number" step="0.01" min="0" value={discount} onChange={e => setDiscount(e.target.value)} /></div>
@@ -295,10 +309,34 @@ export default function SalesPage() {
                 <tr key={s.id}>
                   <td style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{s.invoiceCode ?? s.id.slice(0, 8)}</td>
                   <td style={{ fontSize: 12 }}>{new Date(s.saleDate).toLocaleDateString()}</td>
-                  <td style={{ fontSize: 13 }}>{s.customerName ?? <span style={{ color: 'var(--text-muted)' }}>{t('walkInCustomer')}</span>}</td>
+                  <td style={{ fontSize: 13 }}>
+                    <div style={{ fontWeight: 600 }}>{s.customerName ?? <span style={{ color: 'var(--text-muted)' }}>{t('walkInCustomer')}</span>}</div>
+                    {s.employeeName && (
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                        {s.employeeName}
+                      </div>
+                    )}
+                  </td>
                   <td style={{ fontSize: 12 }}>{s.items?.length ?? 0} {t('items')}</td>
                   <td style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>${(s.totalAmount ?? 0).toFixed(2)} <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.currency}</span></td>
-                  <td><StatusBadge status={s.status} /></td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <StatusBadge status={s.status} />
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 7px',
+                        borderRadius: 10,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        background: s.paid ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: s.paid ? '#10b981' : '#f59e0b',
+                        border: `1px solid ${s.paid ? 'rgba(16,185,129,0.25)' : 'rgba(245,158,11,0.25)'}`
+                      }}>
+                        {s.paid ? 'Paid' : 'Unpaid'}
+                      </span>
+                    </div>
+                  </td>
                   <td>
                     {s.status !== 'CANCELLED' && (
                       <button id={`cancel-sale-${s.id}`} className="btn-danger" style={{ padding: '5px 10px', opacity: cancelling === s.id ? 0.5 : 1 }} onClick={() => handleCancel(s.id)} disabled={cancelling === s.id} title={t('cancelSale')}>

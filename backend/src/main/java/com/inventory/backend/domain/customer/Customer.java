@@ -22,6 +22,9 @@ public class Customer {
     private int status;              // 0=active, 1=inactive
     private String description;
     private String employeeCode;     // assigned sales employee
+    private String vat;
+    private String nameKh;
+    private String addressKh;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -73,6 +76,15 @@ public class Customer {
 
     public String getEmployeeCode() { return employeeCode; }
     public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
+
+    public String getVat() { return vat; }
+    public void setVat(String vat) { this.vat = vat; }
+
+    public String getNameKh() { return nameKh; }
+    public void setNameKh(String nameKh) { this.nameKh = nameKh; }
+
+    public String getAddressKh() { return addressKh; }
+    public void setAddressKh(String addressKh) { this.addressKh = addressKh; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

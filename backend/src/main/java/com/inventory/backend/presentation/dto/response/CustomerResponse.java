@@ -24,6 +24,9 @@ public class CustomerResponse {
     private String statusLabel;
     private String description;
     private String employeeCode;
+    private String vat;
+    private String nameKh;
+    private String addressKh;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

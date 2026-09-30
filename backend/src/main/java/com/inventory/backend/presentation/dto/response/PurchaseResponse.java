@@ -16,6 +16,9 @@ public class PurchaseResponse {
     private String referenceCode;
     private LocalDate purchaseDate;
     private LocalDate deliveryDate;
+    private LocalDate actualDeliveryDate;
+    private String deliveryStatus;
+    private LocalDate paymentDueDate;
     private UUID supplierId;
     private String supplierName;
     private BigDecimal exchangeRate;
@@ -35,6 +38,10 @@ public class PurchaseResponse {
         private UUID productId;
         private String productName;
         private double quantity;
+        private double orderedQuantity;
+        private double receivedQuantity;
+        private double pendingQuantity;
+        private boolean fullyReceived;
         private BigDecimal unitCost;
         private BigDecimal discount;
         private BigDecimal subtotal;
