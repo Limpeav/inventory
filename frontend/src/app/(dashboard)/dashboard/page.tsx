@@ -7,7 +7,7 @@ import { dashboardApi, DashboardStats } from '@/lib/dashboard-api';
 import { useTranslation } from '@/lib/i18n/translations';
 import {
   Users, Package, TrendingUp, AlertTriangle, ArrowUpRight,
-  ShoppingCart, Receipt, RotateCcw, RefreshCw, Warehouse,
+  ShoppingCart, Receipt, RotateCcw, Warehouse,
   DollarSign, Activity, CheckCircle2, ChevronRight, Sparkles
 } from 'lucide-react';
 
@@ -16,11 +16,9 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchStats = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setRefreshing(true);
-    else setLoading(true);
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
     try {
       const data = await dashboardApi.getStats();
       setStats(data);
@@ -28,7 +26,6 @@ export default function DashboardPage() {
       console.error('Failed to load dashboard stats', err);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, []);
 
@@ -69,33 +66,6 @@ export default function DashboardPage() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button
-            id="dashboard-sync-btn"
-            onClick={() => fetchStats(true)}
-            disabled={refreshing}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '10px 16px', borderRadius: '10px',
-              background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)',
-              color: 'var(--text-primary)', fontSize: '13px', fontWeight: '600',
-              cursor: refreshing ? 'not-allowed' : 'pointer',
-              opacity: refreshing ? 0.7 : 1,
-              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-            onMouseEnter={e => {
-              if (!refreshing) {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--primary)';
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-              }
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-subtle)';
-              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-            }}
-          >
-            <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
-            {refreshing ? t('syncing') : t('sync')}
-          </button>
           <Link
             id="dashboard-new-sale-btn"
             href="/sales"

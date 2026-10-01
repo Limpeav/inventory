@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { expenseApi, Expense, ExpenseCategory } from '@/lib/expense-api';
 import { useAuthStore } from '@/store/auth-store';
 import { useTranslation } from '@/lib/i18n/translations';
@@ -8,6 +8,7 @@ import {
   DollarSign, Plus, Search, Trash2, Edit3,
   AlertCircle, X, Calendar, Tag, FileText, CheckCircle2, Clock
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 export default function ExpensesPage() {
   const { hasRole } = useAuthStore();
@@ -162,6 +163,19 @@ export default function ExpensesPage() {
     const matchCat = exp.categoryName?.toLowerCase().includes(q) ?? false;
     return q === '' || matchDesc || matchRef || matchCat;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory, fromDate]);
+
+  const paginatedExpenses = useMemo(() => {
+    if (filteredExpenses.length <= PAGE_SIZE) return filteredExpenses;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredExpenses.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredExpenses, currentPage]);
 
   const totalExpenseAmount = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   const currentMonth = new Date().toISOString().substring(0, 7);
@@ -378,7 +392,7 @@ export default function ExpensesPage() {
                   </td>
                 </tr>
               ) : (
-                filteredExpenses.map(exp => (
+                paginatedExpenses.map(exp => (
                   <tr
                     key={exp.id}
                     style={{
@@ -455,6 +469,15 @@ export default function ExpensesPage() {
           </table>
         </div>
       </div>
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filteredExpenses.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="expenses"
+      />
 
       {/* Record Expense Modal */}
       {showCreateModal && (

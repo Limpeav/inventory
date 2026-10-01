@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { saleApi, Sale } from '@/lib/sale-api';
 import { customerApi, Customer } from '@/lib/customer-api';
 import { productApi, Product } from '@/lib/product-api';
@@ -11,6 +11,7 @@ import {
   Trash2, DollarSign, Ban, CheckCircle2, ClipboardList,
   Printer, ShieldCheck, Tag
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 interface SaleLineItem {
   productId: string;
@@ -722,6 +723,19 @@ export default function SalesPage() {
     return matchQ && matchS;
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus]);
+
+  const paginatedSales = useMemo(() => {
+    if (filtered.length <= PAGE_SIZE) return filtered;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filtered, currentPage]);
+
   const handleCancel = async (id: string) => {
     if (!confirm(t('cancelSaleConfirm'))) return;
     setCancelling(id);
@@ -824,7 +838,7 @@ export default function SalesPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noSalesFound')}</td></tr>
-              ) : filtered.map(s => (
+              ) : paginatedSales.map(s => (
                 <tr key={s.id}>
                   <td style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700 }}>
                     <button
@@ -944,6 +958,15 @@ export default function SalesPage() {
           </table>
         </div>
       )}
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="sales orders"
+      />
 
       {/* Create Sale Modal */}
       {createModalOpen && (

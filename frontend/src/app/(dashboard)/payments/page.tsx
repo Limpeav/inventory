@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { paymentApi, Payment, CreatePaymentRequest } from '@/lib/payment-api';
 import { saleApi, Sale } from '@/lib/sale-api';
 import { purchaseApi, Purchase } from '@/lib/purchase-api';
@@ -10,6 +10,7 @@ import {
   CreditCard, Plus, Search, Trash2,
   AlertCircle, X, DollarSign, ArrowDownLeft, ArrowUpRight
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 export default function PaymentsPage() {
   const { hasRole } = useAuthStore();
@@ -141,6 +142,19 @@ export default function PaymentsPage() {
       (p.note && p.note.toLowerCase().includes(search.toLowerCase())) ||
       p.referenceId.toLowerCase().includes(search.toLowerCase())
     );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterType]);
+
+  const paginatedPayments = useMemo(() => {
+    if (filteredPayments.length <= PAGE_SIZE) return filteredPayments;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filteredPayments.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filteredPayments, currentPage]);
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -283,7 +297,7 @@ export default function PaymentsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredPayments.map(p => {
+                paginatedPayments.map(p => {
                   const saleRef = p.referenceType === 'SALE' ? sales.find(s => s.id === p.referenceId) : null;
                   const purchaseRef = p.referenceType === 'PURCHASE' ? purchases.find(pr => pr.id === p.referenceId) : null;
 
@@ -350,6 +364,15 @@ export default function PaymentsPage() {
           </table>
         </div>
       </div>
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filteredPayments.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="payments"
+      />
 
       {/* Record Payment Modal */}
       {showModal && (

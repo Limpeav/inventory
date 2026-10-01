@@ -8,6 +8,7 @@ import {
   Package, Plus, Pencil, Trash2, X, Search, AlertCircle,
   Tag, RefreshCw, BarChart2, Eye, EyeOff, Wrench, Sparkles, Filter
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 const POPULAR_SEWING_BRANDS = [
   'JUKI', 'JACK', 'BROTHER', 'SIRUBA', 'SINGER',
@@ -371,6 +372,20 @@ export default function ProductsPage() {
     return matchQ && matchCat && matchBrand && matchCond;
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  // Reset to page 1 whenever filters or search query change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterCategory, filterBrand, filterCondition]);
+
+  const paginatedProducts = useMemo(() => {
+    if (filtered.length <= PAGE_SIZE) return filtered;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filtered, currentPage]);
+
   const handleDelete = async (id: string) => {
     if (!confirm(t('deleteProductConfirm'))) return;
     setDeleting(id);
@@ -512,7 +527,7 @@ export default function ProductsPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noProductsFound')}</td></tr>
-              ) : filtered.map(p => {
+              ) : paginatedProducts.map(p => {
                 const cond = p.condition ?? 'NEW';
                 return (
                   <tr key={p.id}>
@@ -600,6 +615,15 @@ export default function ProductsPage() {
           </table>
         </div>
       )}
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="products"
+      />
 
       {/* Modal */}
       {modalOpen && (

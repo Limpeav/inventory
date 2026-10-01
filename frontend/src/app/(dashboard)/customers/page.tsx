@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { customerApi, Customer, CreateCustomerRequest } from '@/lib/customer-api';
 import { lookupApi, Province } from '@/lib/lookup-api';
 import { useTranslation } from '@/lib/i18n/translations';
@@ -8,6 +8,7 @@ import {
   UserCheck, Plus, Pencil, Trash2, X, Search, AlertCircle,
   Phone, MapPin, DollarSign, RefreshCw, CreditCard
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 function CustomerModal({
@@ -203,6 +204,19 @@ export default function CustomersPage() {
     return matchQ && matchS;
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterStatus]);
+
+  const paginatedCustomers = useMemo(() => {
+    if (filtered.length <= PAGE_SIZE) return filtered;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filtered, currentPage]);
+
   const handleDelete = async (id: string) => {
     if (!confirm(t('deleteCustomerConfirm'))) return;
     setDeleting(id);
@@ -291,7 +305,7 @@ export default function CustomersPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noCustomersFound')}</td></tr>
-              ) : filtered.map(c => (
+              ) : paginatedCustomers.map(c => (
                 <tr key={c.id}>
                   <td>
                     <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{c.name}</div>
@@ -331,6 +345,15 @@ export default function CustomersPage() {
           </table>
         </div>
       )}
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="customers"
+      />
 
       {modalOpen && (
         <CustomerModal customer={editing} onClose={closeModal} onSaved={onSaved} />

@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { stockApi, StockItem } from '@/lib/stock-api';
 import { useTranslation } from '@/lib/i18n/translations';
 import {
   Warehouse, AlertTriangle, RefreshCw, Search,
   Package, CheckCircle, Sliders
 } from 'lucide-react';
+import { Pagination } from '@/components/ui/Pagination';
 
 export default function StockPage() {
   const { t } = useTranslation();
@@ -34,6 +35,19 @@ export default function StockPage() {
     const matchLow = !showLowOnly || s.lowStock;
     return matchQ && matchLow;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 25;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, showLowOnly]);
+
+  const paginatedStock = useMemo(() => {
+    if (filtered.length <= PAGE_SIZE) return filtered;
+    const startIndex = (currentPage - 1) * PAGE_SIZE;
+    return filtered.slice(startIndex, startIndex + PAGE_SIZE);
+  }, [filtered, currentPage]);
 
   const handleAdjust = async (productId: string) => {
     const delta = parseFloat(adjustDelta[productId] ?? '0');
@@ -123,7 +137,7 @@ export default function StockPage() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{t('noStockRecords')}</td></tr>
-              ) : filtered.map(s => (
+              ) : paginatedStock.map(s => (
                 <tr key={s.productId} style={{ background: s.lowStock ? 'rgba(239,68,68,0.04)' : undefined }}>
                   <td>
                     <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)' }}>{s.productName ?? s.productId}</div>
@@ -171,6 +185,15 @@ export default function StockPage() {
           </table>
         </div>
       )}
+
+      {/* Pagination (renders only if items > 25) */}
+      <Pagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={PAGE_SIZE}
+        onPageChange={setCurrentPage}
+        itemLabel="items"
+      />
     </div>
   );
 }
