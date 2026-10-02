@@ -83,9 +83,9 @@ public class ProductService {
     }
 
     public void delete(UUID id) {
-        findById(id);
-        stockRepository.deleteByProductId(id);
-        productRepository.deleteById(id);
+        Product product = findById(id);
+        product.setDeleted(true);
+        productRepository.save(product);
     }
 
     private void mapRequestToProduct(CreateProductRequest request, Product product) {

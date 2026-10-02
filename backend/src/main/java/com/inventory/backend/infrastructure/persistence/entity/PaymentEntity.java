@@ -31,8 +31,17 @@ public class PaymentEntity {
     @Column(name = "reference_id", nullable = false)
     private UUID referenceId;
 
+    @Column(name = "reference_code", length = 100)
+    private String referenceCode;
+
     @Column(nullable = false, precision = 15, scale = 4)
     private BigDecimal amount;
+
+    @Column(name = "total_amount", precision = 15, scale = 4)
+    private BigDecimal totalAmount;
+
+    @Column(name = "remaining_balance", precision = 15, scale = 4)
+    private BigDecimal remainingBalance;
 
     @Column(name = "payment_method", length = 30)
     @Builder.Default

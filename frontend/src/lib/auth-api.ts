@@ -1,27 +1,28 @@
 import api from '@/lib/api';
 import { ApiResponse, AuthResponse, ForgotPasswordRequest, LoginRequest, ResetPasswordRequest } from '@/types';
-import Cookies from 'js-cookie';
+import axios from 'axios';
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<ApiResponse<AuthResponse>> => {
-    const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
+    // Send to Next.js route handler to set HttpOnly cookies
+    const response = await axios.post<ApiResponse<AuthResponse>>('/api/auth/login', data);
     return response.data;
   },
 
   forgotPassword: async (data: ForgotPasswordRequest): Promise<ApiResponse<null>> => {
+    // Password reset goes through the standard proxy
     const response = await api.post<ApiResponse<null>>('/auth/forgot-password', data);
     return response.data;
   },
 
   resetPassword: async (data: ResetPasswordRequest): Promise<ApiResponse<null>> => {
+    // Password reset goes through the standard proxy
     const response = await api.post<ApiResponse<null>>('/auth/reset-password', data);
     return response.data;
   },
 
   logout: async (): Promise<void> => {
-    await api.post('/auth/logout');
-    Cookies.remove('accessToken');
-    Cookies.remove('refreshToken');
-    Cookies.remove('user');
+    // Send to Next.js route handler to clear cookies
+    await axios.post('/api/auth/logout');
   },
 };

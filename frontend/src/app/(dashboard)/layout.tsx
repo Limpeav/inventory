@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth-api';
-import Cookies from 'js-cookie';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { LanguageToggle } from '@/components/language-toggle';
 import { useTranslation, TranslationKey } from '@/lib/i18n/translations';
@@ -60,13 +59,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [pathname]);
 
   useEffect(() => {
-    const token = Cookies.get('accessToken');
-    const refreshToken = Cookies.get('refreshToken');
-    if (!token && !refreshToken) {
+    if (mounted && !isAuthenticated) {
       clearAuth();
       router.replace('/login');
     }
-  }, [clearAuth, router]);
+  }, [mounted, isAuthenticated, clearAuth, router]);
 
   const handleLogout = async () => {
     try { await authApi.logout(); } catch {}

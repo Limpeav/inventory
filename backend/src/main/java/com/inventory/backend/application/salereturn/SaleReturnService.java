@@ -72,8 +72,15 @@ public class SaleReturnService {
             if (saleItem == null) {
                 throw new IllegalArgumentException("Product '" + product.getName() + "' was not part of this sale");
             }
-            if (ir.getQuantity() > saleItem.getQuantity()) {
-                throw new IllegalArgumentException("Returned quantity (" + ir.getQuantity() + ") exceeds sold quantity (" + saleItem.getQuantity() + ") for '" + product.getName() + "'");
+            double alreadyReturned = saleReturnRepository.findBySaleId(request.getSaleId()).stream()
+                    .filter(r -> !"CANCELLED".equals(r.getStatus()))
+                    .flatMap(r -> r.getItems().stream())
+                    .filter(ri -> ri.getProductId().equals(ir.getProductId()))
+                    .mapToDouble(SaleReturnItem::getQuantity)
+                    .sum();
+
+            if (ir.getQuantity() + alreadyReturned > saleItem.getQuantity()) {
+                throw new IllegalArgumentException("Returned quantity (" + (ir.getQuantity() + alreadyReturned) + ") exceeds sold quantity (" + saleItem.getQuantity() + ") for '" + product.getName() + "'");
             }
 
             BigDecimal originalPrice = saleItem.getUnitPrice();

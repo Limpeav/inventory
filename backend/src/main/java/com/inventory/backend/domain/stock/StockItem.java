@@ -13,6 +13,7 @@ public class StockItem {
     private double quantity;
     private double reservedQty;   // qty reserved by pending orders
     private LocalDateTime updatedAt;
+    private Long version;
 
     public StockItem() {}
 
@@ -45,4 +46,7 @@ public class StockItem {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

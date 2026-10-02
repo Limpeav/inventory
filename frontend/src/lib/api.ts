@@ -1,8 +1,8 @@
 import axios from 'axios';
-import Cookies from 'js-cookie';
 import { useAuthStore } from '@/store/auth-store';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+// Point all API requests to the local Next.js proxy
+const API_BASE_URL = '/api/proxy';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,25 +11,16 @@ const api = axios.create({
   },
 });
 
-// Attach access token to every request
-api.interceptors.request.use((config) => {
-  const token = Cookies.get('accessToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 let isRefreshing = false;
 let failedQueue: Array<{
-  resolve: (token: string) => void;
+  resolve: (value?: unknown) => void;
   reject: (err: unknown) => void;
 }> = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (token) {
-      prom.resolve(token);
+      prom.resolve();
     } else {
       prom.reject(error);
     }
@@ -50,31 +41,19 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized (token expired/missing) — attempt token refresh.
-    // NOTE: 403 Forbidden means the user IS authenticated but lacks the required role.
-    // Refreshing the token will NOT fix a 403, so we must NOT intercept it here.
+    // Handle 401 Unauthorized (token expired/missing) — attempt token refresh via proxy.
     if (
       error.response?.status === 401 &&
       originalRequest &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      originalRequest.url !== '/auth/login' &&
+      originalRequest.url !== '/auth/refresh'
     ) {
-      const refreshToken = Cookies.get('refreshToken');
-
-      if (!refreshToken) {
-        handleLogout();
-        return Promise.reject(error);
-      }
-
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
-            resolve: (token: string) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(api(originalRequest));
-            },
-            reject: (err: unknown) => {
-              reject(err);
-            },
+            resolve: () => resolve(api(originalRequest)),
+            reject: (err) => reject(err),
           });
         });
       }
@@ -83,14 +62,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-        const newToken = data.data.accessToken;
-        const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
-        Cookies.set('accessToken', newToken, { expires: 1, sameSite: 'lax', secure: isSecure });
-        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-        processQueue(null, newToken);
+        // The refresh proxy will read the HttpOnly refresh token cookie and obtain a new access token
+        await axios.post('/api/auth/refresh');
+        
+        processQueue(null, 'refreshed');
+        // Re-run the original request, the proxy will now use the new cookie
         return api(originalRequest);
       } catch (refreshErr) {
         processQueue(refreshErr, null);

@@ -26,16 +26,12 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<Payment> findAll() {
-        List<Payment> payments = paymentRepository.findAll();
-        payments.forEach(this::enrichPayment);
-        return payments;
+        return paymentRepository.findAll();
     }
 
     @Transactional(readOnly = true)
     public List<Payment> findByReferenceId(UUID referenceId) {
-        List<Payment> payments = paymentRepository.findByReferenceId(referenceId);
-        payments.forEach(this::enrichPayment);
-        return payments;
+        return paymentRepository.findByReferenceId(referenceId);
     }
 
     @Transactional(readOnly = true)
@@ -86,25 +82,7 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    private void enrichPayment(Payment p) {
-        if (p.getReferenceId() != null && (p.getReferenceCode() == null || p.getTotalAmount() == null)) {
-            if ("SALE".equalsIgnoreCase(p.getReferenceType())) {
-                saleRepository.findById(p.getReferenceId()).ifPresent(s -> {
-                    if (p.getReferenceCode() == null) p.setReferenceCode(s.getInvoiceCode());
-                    if (p.getTotalAmount() == null || p.getTotalAmount().compareTo(BigDecimal.ZERO) == 0) {
-                        p.setTotalAmount(s.getTotalAmount());
-                    }
-                });
-            } else if ("PURCHASE".equalsIgnoreCase(p.getReferenceType())) {
-                purchaseRepository.findById(p.getReferenceId()).ifPresent(pur -> {
-                    if (p.getReferenceCode() == null) p.setReferenceCode(pur.getReferenceCode());
-                    if (p.getTotalAmount() == null || p.getTotalAmount().compareTo(BigDecimal.ZERO) == 0) {
-                        p.setTotalAmount(pur.getTotalAmount());
-                    }
-                });
-            }
-        }
-    }
+    // enrichPayment removed
 
     public void delete(UUID id) {
         paymentRepository.findById(id)
