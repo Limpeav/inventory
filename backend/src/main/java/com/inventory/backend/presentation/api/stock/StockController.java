@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,12 @@ public class StockController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<StockResponse>>> findAll() {
+        Map<UUID, Product> productMap = productRepository.findAllActive().stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
         List<StockResponse> list = stockService.findAll().stream()
-                .map(this::toResponse).collect(Collectors.toList());
+                .map(s -> toResponseFast(s, productMap.get(s.getProductId())))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
@@ -38,8 +43,12 @@ public class StockController {
     @GetMapping("/low")
     public ResponseEntity<ApiResponse<List<StockResponse>>> findLowStock(
             @RequestParam(name = "threshold", defaultValue = "10") double threshold) {
+        Map<UUID, Product> productMap = productRepository.findAllActive().stream()
+                .collect(Collectors.toMap(Product::getId, p -> p));
+
         List<StockResponse> list = stockService.findLowStock(threshold).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+                .map(s -> toResponseFast(s, productMap.get(s.getProductId())))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(list));
     }
 
@@ -61,6 +70,10 @@ public class StockController {
 
     private StockResponse toResponse(StockItem s) {
         Product product = productRepository.findById(s.getProductId()).orElse(null);
+        return toResponseFast(s, product);
+    }
+
+    private StockResponse toResponseFast(StockItem s, Product product) {
         return StockResponse.builder()
                 .id(s.getId())
                 .productId(s.getProductId())

@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,11 @@ public class ProductController {
     public ResponseEntity<ApiResponse<List<ProductResponse>>> findAll(
             @RequestParam(name = "activeOnly", defaultValue = "false") boolean activeOnly) {
         List<Product> products = activeOnly ? productService.findAllActive() : productService.findAll();
-        List<ProductResponse> response = products.stream().map(this::toResponse).collect(Collectors.toList());
+        Map<UUID, String> categoryNames = productService.getAllCategoryNames();
+        
+        List<ProductResponse> response = products.stream()
+                .map(p -> toResponseFast(p, categoryNames.get(p.getCategoryId())))
+                .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -63,6 +68,10 @@ public class ProductController {
     }
 
     private ProductResponse toResponse(Product p) {
+        return toResponseFast(p, productService.resolveCategoryName(p.getCategoryId()));
+    }
+
+    private ProductResponse toResponseFast(Product p, String categoryName) {
         return ProductResponse.builder()
                 .id(p.getId())
                 .name(p.getName())
@@ -71,7 +80,7 @@ public class ProductController {
                 .packageUnit(p.getPackageUnit())
                 .description(p.getDescription())
                 .categoryId(p.getCategoryId())
-                .categoryName(productService.resolveCategoryName(p.getCategoryId()))
+                .categoryName(categoryName)
                 .cost(p.getCost())
                 .price(p.getPrice())
                 .reorderLevel(p.getReorderLevel())

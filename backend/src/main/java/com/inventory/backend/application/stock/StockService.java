@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +24,12 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public List<StockItem> findAll() {
+        Set<UUID> activeProductIds = productRepository.findAllActive().stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+                
         return stockRepository.findAll().stream()
-                .filter(s -> productRepository.findById(s.getProductId()).map(p -> !p.isDeleted()).orElse(false))
+                .filter(s -> activeProductIds.contains(s.getProductId()))
                 .toList();
     }
 
@@ -41,8 +47,12 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public List<StockItem> findLowStock(double threshold) {
+        Set<UUID> activeProductIds = productRepository.findAllActive().stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+
         return stockRepository.findLowStock(threshold).stream()
-                .filter(s -> productRepository.findById(s.getProductId()).map(p -> !p.isDeleted()).orElse(false))
+                .filter(s -> activeProductIds.contains(s.getProductId()))
                 .toList();
     }
 

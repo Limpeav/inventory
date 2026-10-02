@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -114,5 +115,11 @@ public class ProductService {
     public String resolveCategoryName(UUID categoryId) {
         if (categoryId == null) return null;
         return categoryRepository.findById(categoryId).map(Category::getName).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, String> getAllCategoryNames() {
+        return categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(Category::getId, Category::getName));
     }
 }
