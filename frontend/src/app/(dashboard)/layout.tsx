@@ -293,37 +293,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <LanguageToggle />
             <ThemeToggle />
-            <button
-              style={{
-                width: '36px', height: '36px', borderRadius: '10px', border: '1px solid var(--border-subtle)',
-                background: 'var(--bg-subtle)', cursor: 'pointer', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)',
-                position: 'relative',
-                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--primary)';
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-subtle)';
-                (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-              }}
-              onClick={() => router.push('/stock?filter=low')}
-              title={t('lowStockAlerts')}
-            >
-              <Bell size={16} />
-              <span
-                style={{
-                  position: 'absolute', top: 8, right: 8,
-                  width: 7, height: 7, borderRadius: '50%',
-                  backgroundColor: '#6366f1',
-                  boxShadow: '0 0 6px #6366f1',
-                }}
-              />
-            </button>
 
             {/* Profile Dropdown */}
             <div style={{ position: 'relative' }}>
