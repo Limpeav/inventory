@@ -204,7 +204,7 @@ function InvoiceModal({
                 color: '#10b981'
               }}>
                 <span>{t('grandTotal')}:</span>
-                <span>${(sale.totalAmount ?? 0).toFixed(2)} USD</span>
+                <span>${(sale.totalAmount ?? 0).toFixed(2)}</span>
               </div>
               <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                 ≈ {((sale.totalAmount ?? 0) * 4100).toLocaleString()} KHR (៛)
@@ -646,7 +646,7 @@ function CreateSaleModal({
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, color: '#10b981', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
                 <span>{t('total')}</span>
-                <span>${total.toFixed(2)} USD</span>
+                <span>${total.toFixed(2)}</span>
               </div>
               <div style={{ textAlign: 'right', fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                 ≈ {(total * 4100).toLocaleString()} ៛ (KHR)
@@ -903,7 +903,7 @@ export default function SalesPage() {
                   </td>
 
                   <td style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>
-                    ${(s.totalAmount ?? 0).toFixed(2)} <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.currency}</span>
+                    ${(s.totalAmount ?? 0).toFixed(2)}
                   </td>
 
                   <td>
