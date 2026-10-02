@@ -311,7 +311,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
                 (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
               }}
-              title={t('notifications')}
+              onClick={() => router.push('/stock?filter=low')}
+              title={t('lowStockAlerts')}
             >
               <Bell size={16} />
               <span

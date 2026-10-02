@@ -116,7 +116,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <Link
-            href="/stock"
+            href="/stock?filter=low"
             style={{
               fontSize: '13px', fontWeight: '600', color: '#f87171',
               display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none',
@@ -354,7 +354,7 @@ export default function DashboardPage() {
                 </h2>
               </div>
               <Link
-                href="/stock"
+                href="/stock?filter=low"
                 style={{
                   fontSize: '12px', color: 'var(--primary-light)', textDecoration: 'none', fontWeight: '600',
                   display: 'flex', alignItems: 'center', gap: '3px',

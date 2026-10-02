@@ -27,6 +27,15 @@ export default function StockPage() {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('filter') === 'low') {
+        setShowLowOnly(true);
+      }
+    }
+  }, []);
+
   const filtered = stock.filter(s => {
     const q = search.toLowerCase();
     const matchQ = !q
@@ -145,10 +154,10 @@ export default function StockPage() {
                   </td>
                   <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{s.barcode ?? '—'}</td>
                   <td style={{ fontSize: 14, fontWeight: 600, color: s.lowStock ? '#ef4444' : 'var(--text-primary)' }}>
-                    {s.quantity.toFixed(2)}
+                    {s.quantity}
                   </td>
-                  <td style={{ fontSize: 13 }}>{(s.reservedQty ?? 0).toFixed(2)}</td>
-                  <td style={{ fontSize: 13, color: '#10b981', fontWeight: 600 }}>{(s.availableQty ?? s.quantity).toFixed(2)}</td>
+                  <td style={{ fontSize: 13 }}>{s.reservedQty ?? 0}</td>
+                  <td style={{ fontSize: 13, color: '#10b981', fontWeight: 600 }}>{s.availableQty ?? s.quantity}</td>
                   <td style={{ fontSize: 12 }}>{s.reorderLevel ?? 0}</td>
                   <td>
                     {s.lowStock
