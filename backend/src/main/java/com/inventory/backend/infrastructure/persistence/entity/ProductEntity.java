@@ -44,6 +44,10 @@ public class ProductEntity {
     @Column(name = "category_id")
     private UUID categoryId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
+    private CategoryEntity category;
+
     @Column(precision = 15, scale = 4)
     private BigDecimal cost;
 

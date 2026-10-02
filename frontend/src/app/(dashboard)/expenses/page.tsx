@@ -471,13 +471,15 @@ export default function ExpensesPage() {
       </div>
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filteredExpenses.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="expenses"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredExpenses.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="expenses"
+        />
+      )}
 
       {/* Record Expense Modal */}
       {showCreateModal && (

@@ -86,6 +86,9 @@ public class ProductService {
         Product product = findById(id);
         product.setDeleted(true);
         productRepository.save(product);
+        
+        // Ensure stock is also cleaned up when a product is soft-deleted
+        stockRepository.deleteByProductId(id);
     }
 
     private void mapRequestToProduct(CreateProductRequest request, Product product) {

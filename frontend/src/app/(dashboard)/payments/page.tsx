@@ -366,13 +366,15 @@ export default function PaymentsPage() {
       </div>
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filteredPayments.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="payments"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredPayments.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="payments"
+        />
+      )}
 
       {/* Record Payment Modal */}
       {showModal && (

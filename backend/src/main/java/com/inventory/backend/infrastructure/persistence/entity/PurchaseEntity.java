@@ -50,8 +50,16 @@ public class PurchaseEntity {
     @Column(name = "supplier_id")
     private UUID supplierId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_purchase_supplier"))
+    private SupplierEntity supplier;
+
     @Column(name = "user_id")
     private UUID userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_purchase_user"))
+    private UserEntity user;
 
     @Column(name = "exchange_rate", precision = 15, scale = 4)
     @Builder.Default

@@ -22,7 +22,9 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public List<StockItem> findAll() {
-        return stockRepository.findAll();
+        return stockRepository.findAll().stream()
+                .filter(s -> productRepository.findById(s.getProductId()).map(p -> !p.isDeleted()).orElse(false))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -39,7 +41,9 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public List<StockItem> findLowStock(double threshold) {
-        return stockRepository.findLowStock(threshold);
+        return stockRepository.findLowStock(threshold).stream()
+                .filter(s -> productRepository.findById(s.getProductId()).map(p -> !p.isDeleted()).orElse(false))
+                .toList();
     }
 
     /**

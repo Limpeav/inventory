@@ -960,13 +960,15 @@ export default function SalesPage() {
       )}
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="sales orders"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="sales orders"
+        />
+      )}
 
       {/* Create Sale Modal */}
       {createModalOpen && (

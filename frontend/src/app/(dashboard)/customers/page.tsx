@@ -351,13 +351,15 @@ export default function CustomersPage() {
       )}
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="customers"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="customers"
+        />
+      )}
 
       {modalOpen && (
         <CustomerModal customer={editing} onClose={closeModal} onSaved={onSaved} />

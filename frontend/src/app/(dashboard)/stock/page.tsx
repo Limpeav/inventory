@@ -187,13 +187,15 @@ export default function StockPage() {
       )}
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="items"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="items"
+        />
+      )}
     </div>
   );
 }

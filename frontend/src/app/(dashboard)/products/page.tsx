@@ -617,13 +617,15 @@ export default function ProductsPage() {
       )}
 
       {/* Pagination (renders only if items > 25) */}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        pageSize={PAGE_SIZE}
-        onPageChange={setCurrentPage}
-        itemLabel="products"
-      />
+      {!loading && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setCurrentPage}
+          itemLabel="products"
+        />
+      )}
 
       {/* Modal */}
       {modalOpen && (

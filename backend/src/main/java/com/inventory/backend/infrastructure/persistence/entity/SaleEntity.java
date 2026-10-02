@@ -37,11 +37,23 @@ public class SaleEntity {
     @Column(name = "customer_id")
     private UUID customerId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_sale_customer"))
+    private CustomerEntity customer;
+
     @Column(name = "employee_id")
     private UUID employeeId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_sale_employee"))
+    private EmployeeEntity employee;
+
     @Column(name = "user_id")
     private UUID userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_sale_user"))
+    private UserEntity user;
 
     @Column(name = "exchange_rate", precision = 15, scale = 4)
     @Builder.Default

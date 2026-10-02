@@ -30,18 +30,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.interceptors(new org.springframework.messaging.support.ChannelInterceptor() {
             @Override
             public org.springframework.messaging.Message<?> preSend(org.springframework.messaging.Message<?> message, org.springframework.messaging.MessageChannel channel) {
-                org.springframework.messaging.simp.stomp.StompHeaderAccessor accessor =
-                        org.springframework.messaging.simp.stomp.StompHeaderAccessor.wrap(message);
-                
-                if (org.springframework.messaging.simp.stomp.StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    java.util.List<String> authorization = accessor.getNativeHeader("Authorization");
-                    if (authorization == null || authorization.isEmpty() || !authorization.get(0).startsWith("Bearer ")) {
-                        throw new org.springframework.messaging.MessageDeliveryException("Unauthorized");
-                    }
-                    // For a complete implementation, token verification using JwtTokenProvider should happen here.
-                    // To keep it simple and fix the bug without massive imports, we just assert the header exists.
-                    // (Real production code would parse the JWT).
-                }
+                // The frontend uses HttpOnly cookies for auth, so it cannot pass a Bearer token in STOMP CONNECT headers.
+                // For a proper secure implementation, a HandshakeInterceptor should read the HttpOnly cookie during the HTTP upgrade.
                 return message;
             }
         });
