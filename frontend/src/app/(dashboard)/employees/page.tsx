@@ -92,7 +92,11 @@ function EmployeeModal({
             </div>
             <div>
               <label className="label">{t('phone')}</label>
-              <input className="input-field" value={form.phone} onChange={e => handle('phone', e.target.value)} placeholder="+855 xx xxx xxx" />
+              <input className="input-field" value={form.phone} onChange={e => {
+                let v = e.target.value;
+                if (v && !v.startsWith('0')) v = '0' + v;
+                handle('phone', v);
+              }} placeholder="0xx xxx xxx" />
             </div>
             <div>
               <label className="label">{t('colStartDate')}</label>

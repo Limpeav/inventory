@@ -90,11 +90,19 @@ function SupplierModal({
             </div>
             <div>
               <label className="label">{t('telephone')}</label>
-              <input className="input-field" value={form.telephone} onChange={e => handle('telephone', e.target.value)} placeholder="Office telephone" />
+              <input className="input-field" value={form.telephone} onChange={e => {
+                let v = e.target.value;
+                if (v && !v.startsWith('0')) v = '0' + v;
+                handle('telephone', v);
+              }} placeholder="0xx xxx xxx" />
             </div>
             <div>
               <label className="label">{t('mobilePhone')}</label>
-              <input className="input-field" value={form.phone} onChange={e => handle('phone', e.target.value)} placeholder="Mobile number" />
+              <input className="input-field" value={form.phone} onChange={e => {
+                let v = e.target.value;
+                if (v && !v.startsWith('0')) v = '0' + v;
+                handle('phone', v);
+              }} placeholder="0xx xxx xxx" />
             </div>
             <div>
               <label className="label">{t('fax')}</label>
